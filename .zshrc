@@ -45,3 +45,59 @@ screengrab() {
     ffmpeg -f x11grab -s 1920x1080 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
     ffmpeg -threads 8 -i ~/grab.mkv -crf 10 -b:v 3M ~/grab.webm
 }
+
+# 4chan-compatible webm
+webm() {
+    while getopts ":i:o:w:q:s:d:t:" opt; do
+      case $opt in
+        i) input="$OPTARG"
+        ;;
+        o) output="$OPTARG"
+        ;;
+        w) width="$OPTARG"
+        ;;
+        q) quality="$OPTARG"
+        ;;
+        s) start="$OPTARG"
+        ;;
+        d) duration="$OPTARG"
+        ;;
+        t) subtitles="$OPTARG"
+        ;;
+        \?) echo "Invalid option -$OPTARG" >&2
+        ;;
+      esac
+    done
+
+    if [ -z "$input" ]; then
+        printf "Required input parameter -i not given\n"
+        return
+    fi
+
+    if [ -z "$output" ]; then
+        printf "Required output parameter -o not given\n"
+        return
+    fi
+
+    if [ -z "$start" ]; then
+        printf "Required start time parameter -s not given\n"
+        return
+    fi
+
+    if [ -z "$duration" ]; then
+        printf "Required duration parameter -e not given\n"
+        return
+    fi
+
+    if [ "$subtitles" ]; then
+        enable_subtitles="-vf subtitles=$input"
+    fi
+
+    if [ -z "$width" ]; then
+        width=960
+    fi
+
+    ffmpeg_str="ffmpeg -threads 8 -i $input -codec:v libvpx -vf scale=$width:-1 -crf 10 -b:v 3M -ss $start -t $duration -an -sn $enable_subtitles $output"
+    eval "$ffmpeg_str"
+    # TODO: add filesize check, repeat if unsatisfactory
+}
