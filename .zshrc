@@ -14,15 +14,17 @@ compinit
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
 alias diff='diff -aur --color'
 alias git-locate='git ls-files | grep'
+alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias ls='ls -h --color=auto -N'
+alias mpv='mpv -fs'
+alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii; echo'
 alias screenfetch='screenfetch -c 04,00'
 alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
-alias lastscreen='ls ~/ss/*.png | tail -n 1'
-alias suvim='sudo -E vim'
+alias suvim='sudo -E nvim'
 alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'
-alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii; echo'
+alias vim='nvim'
 
-export EDITOR=vim
+export EDITOR=nvim
 export GOPATH=$HOME
 export PATH=$GOPATH/bin:$HOME/bin:$PATH
 export PS1='@%m %1~ $ '
@@ -42,7 +44,7 @@ export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 
 # webm
 screengrab() {
-    ffmpeg -f x11grab -s 1920x1080 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
+    ffmpeg -f x11grab -s 2560x1440 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
     ffmpeg -threads 8 -i ~/grab.mkv -crf 10 -b:v 3M ~/grab.webm
 }
 
