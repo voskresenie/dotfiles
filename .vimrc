@@ -66,7 +66,7 @@ autocmd BufWinLeave *.* mkview          " save folds et al when loading
 autocmd BufWinEnter *.* silent loadview " load folds et al when opening
 
 " caused problem with arrow keys in insert mode, solved with "nocompatible"
-set noesckeys
+"set noesckeys
 set nocompatible
 
 " mark 80 char
