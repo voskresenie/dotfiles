@@ -37,22 +37,22 @@
 #keystate_capslock = enable
 #keystate_scrolllock= enable
 
-amixer -q sset Master toggle
+"amixer -q sset Master toggle"
   XF86AudioMute
 
-amixer -q sset Master 3%+
+"amixer -q sset Master 3%+"
   XF86AudioRaiseVolume
 
-amixer -q sset Master 3%-
+"amixer -q sset Master 3%-"
   XF86AudioLowerVolume
 
-amixer -q sset Capture toggle
+"amixer -q sset Capture toggle"
   XF86AudioMicMute
 
-xbacklight -5
+"xbacklight -5"
   XF86MonBrightnessDown
 
-xbacklight +5
+"xbacklight +5"
   XF86MonBrightnessUp
 
 # Examples of commands:

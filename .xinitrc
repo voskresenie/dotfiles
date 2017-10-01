@@ -16,7 +16,7 @@ fi
 while true; do
   nowplaying=$(mpc -f "Now Playing: %artist% - %title%" | egrep Now\ Playing: | awk 'sub(/Now Playing:/,"") { print $N, "  |   " }' | tr '[:lower:]' '[:upper:]')
 
-  vol=$(amixer sget Master | egrep Front\ Right: | awk -F "[][]" '{ print "VOL", $2, "  |   " }')
+  vol=$(amixer sget Master | egrep Mono: | awk -F "[][]" '{ print "VOL", $2, "  |   " }')
   battery=$(acpi -b | awk -F ", " '{print "BAT", $2, "  |   "}')
 
   xsetroot -name "${nowplaying}${vol}${battery}$(date +"%^a %d %^b %Y %l:%M:%S %p")"
@@ -41,6 +41,11 @@ compton -b -e .3 --vsync opengl
 
 # this helps with full screen games
 wmname LG3D
+
+# Japanese input
+export GTK_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+export QT_IM_MODULE=ibus
 
 # start dwm
 exec /usr/bin/dwm
