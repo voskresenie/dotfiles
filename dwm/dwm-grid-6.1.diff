@@ -1,0 +1,285 @@
+diff -aur a/config.def.h b/config.def.h
+--- a/config.def.h	2017-07-28 07:15:18.186352453 -0700
++++ b/config.def.h	2017-07-28 07:15:05.543019429 -0700
+@@ -24,9 +24,14 @@
+ 	 *	WM_CLASS(STRING) = instance, class
+ 	 *	WM_NAME(STRING) = title
+ 	 */
+-	/* class      instance    title       tags mask     isfloating   monitor */
+-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
+-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
++    /* BEGIN grid */
++	/* class      instance    title       tags mask     x,y,w,h     isfloating   monitor */
++	{ "Gimp",     NULL,       NULL,       0,            0,0,1,1,    1,           -1 },
++	{ "Firefox",  NULL,       NULL,       0,            2,0,2,3,    0,           -1 },
++    /* END grid */
++    /* BEGIN config */
++	{ "Cities: Skylines",     NULL,       NULL,       0,            0,0,1,1,    1,           -1 },
++    /* END config */
+ };
+ 
+ /* layout(s) */
+@@ -39,6 +44,9 @@
+ 	{ "[]=",      tile },    /* first entry is default */
+ 	{ "><>",      NULL },    /* no layout function means floating behavior */
+ 	{ "[M]",      monocle },
++	/* BEGIN grid */
++	{ "|||",      gridtile },
++	/* END grid */
+ };
+ 
+ /* key definitions */
+@@ -74,6 +82,9 @@
+ 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
+ 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
+ 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
++	/* BEGIN grid */
++	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[3]} },
++	/* END grid */
+ 	{ MODKEY,                       XK_space,  setlayout,      {0} },
+ 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+ 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
+@@ -82,6 +93,16 @@
+ 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
+ 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
+ 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
++    /* BEGIN grid */
++	{ MODKEY,                       XK_Up,     gridmove,       {.v = (int []){  0, -1 } } },
++	{ MODKEY,                       XK_Down,   gridmove,       {.v = (int []){  0,  1 } } },
++	{ MODKEY,                       XK_Left,   gridmove,       {.v = (int []){ -1,  0 } } },
++	{ MODKEY,                       XK_Right,  gridmove,       {.v = (int []){  1,  0 } } },
++	{ MODKEY|ShiftMask,             XK_Up,     gridresize,     {.v = (int []){  0, -1 } } },
++	{ MODKEY|ShiftMask,             XK_Down,   gridresize,     {.v = (int []){  0,  1 } } },
++	{ MODKEY|ShiftMask,             XK_Left,   gridresize,     {.v = (int []){ -1,  0 } } },
++	{ MODKEY|ShiftMask,             XK_Right,  gridresize,     {.v = (int []){  1,  0 } } },
++    /* END grid */
+ 	TAGKEYS(                        XK_1,                      0)
+ 	TAGKEYS(                        XK_2,                      1)
+ 	TAGKEYS(                        XK_3,                      2)
+diff -aur a/dwm.c b/dwm.c
+--- a/dwm.c	2017-07-28 07:15:18.053019124 -0700
++++ b/dwm.c	2017-07-28 07:15:05.383019433 -0700
+@@ -24,6 +24,9 @@
+ #include <locale.h>
+ #include <signal.h>
+ #include <stdarg.h>
++/* BEGIN grid */
++#include <stdbool.h>
++/* END grid */
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -97,6 +100,9 @@
+ 	Client *snext;
+ 	Monitor *mon;
+ 	Window win;
++    /* BEGIN grid */
++    int gx, gy, gw, gh;
++    /* END grid */
+ };
+ 
+ typedef struct {
+@@ -130,6 +136,9 @@
+ 	Monitor *next;
+ 	Window barwin;
+ 	const Layout *lt[2];
++    /* BEGIN grid */
++    int gm, gn;
++    /* END grid */
+ };
+ 
+ typedef struct {
+@@ -137,6 +146,9 @@
+ 	const char *instance;
+ 	const char *title;
+ 	unsigned int tags;
++    /* BEGIN grid */
++    unsigned int x, y, w, h;
++    /* END grid */
+ 	int isfloating;
+ 	int monitor;
+ } Rule;
+@@ -233,6 +245,15 @@
+ static int xerrordummy(Display *dpy, XErrorEvent *ee);
+ static int xerrorstart(Display *dpy, XErrorEvent *ee);
+ static void zoom(const Arg *arg);
++/* BEGIN grid */
++static bool gridfree(Monitor *m, int x, int y, bool self);
++static bool gridspace(Monitor *m, int x, int y, int w, int h, bool mvrs);
++static void gridsetpos(Client *c, int x, int y, int w, int h);
++static void gridmove(const Arg *arg);
++static void gridresize(const Arg *arg);
++static void gridnew(Client *c, int x, int y, int w, int h);
++static void gridtile(Monitor *m);
++/* END grid */
+ 
+ /* variables */
+ static const char broken[] = "broken";
+@@ -297,6 +318,12 @@
+ 		&& (!r->instance || strstr(instance, r->instance)))
+ 		{
+ 			c->isfloating = r->isfloating;
++            /* BEGIN grid */
++            c->gx = r->x;
++            c->gy = r->y;
++            c->gw = r->w;
++            c->gh = r->h;
++            /* END grid */
+ 			c->tags |= r->tags;
+ 			for (m = mons; m && m->num != r->monitor; m = m->next);
+ 			if (m)
+@@ -650,6 +677,10 @@
+ 	m->lt[0] = &layouts[0];
+ 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
+ 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
++    /* BEGIN grid */
++    m->gm = 4;
++    m->gn = 4;
++    /* END grid */
+ 	return m;
+ }
+ 
+@@ -1045,6 +1076,13 @@
+ 	} else {
+ 		c->mon = selmon;
+ 		applyrules(c);
++        /* BEGIN grid */
++        if (c->gw > 0 && c->gh > 0) {
++            gridnew(c, c->gx, c->gy, c->gw, c->gh);
++        } else {
++            gridnew(c, 0, 0, 1, 1);
++        }
++        /* END grid */
+ 	}
+ 	/* geometry */
+ 	c->x = c->oldx = wa->x;
+@@ -2120,6 +2158,129 @@
+ 	pop(c);
+ }
+ 
++/* BEGIN grid */
++/* BEGIN blackbox */
++bool
++gridfree(Monitor *m, int x, int y, bool self)
++{
++    Client *c;
++    if (x < 0 || x >= m->gm || y < 0 || y >= m->gm) return false;
++
++    for (c = m->clients; c; c = c->next)
++        if (ISVISIBLE(c) && x >= c->gx && x < c->gx + c->gw && y >= c->gy && y < c->gy + c->gh && (c != m->sel || !self))
++            return false;
++
++    return true;
++}
++
++bool
++gridspace(Monitor *m, int x, int y, int w, int h, bool mvrs) {
++    int i, j;
++
++    for (i = x; i < x + w; i++)
++        for (j = y; j < y + h; j++)
++            if (!gridfree(m, i, j, mvrs)) return false;
++
++    return true;
++}
++
++void
++gridsetpos(Client *c, int x, int y, int w, int h)
++{
++    c->gx = x;
++    c->gy = y;
++    c->gw = w;
++    c->gh = h;
++}
++/* END blackbox */
++
++void
++gridmove(const Arg *arg)
++{
++    int x, y;
++
++    Monitor *m = selmon;
++    Client *c = m->sel;
++
++    x = c->gx + ((int *)arg->v)[0];
++    y = c->gy + ((int *)arg->v)[1];
++
++    if (gridspace(m, x, y, c->gw, c->gh, true)) {
++        gridsetpos(c, x, y, c->gw, c->gh);
++    }
++
++    arrange(m);
++}
++
++void
++gridresize(const Arg *arg)
++{
++    int w, h;
++
++    Monitor *m = selmon;
++    Client *c = m->sel;
++
++    w = c->gw + ((int *)arg->v)[0];
++    h = c->gh + ((int *)arg->v)[1];
++
++    if (gridspace(m, c->gx, c->gy, w, h, true)) {
++        gridsetpos(c, c->gx, c->gy, w, h);
++    }
++
++    arrange(m);
++}
++
++void
++gridnew(Client *c, int x, int y, int w, int h)
++{
++    unsigned int i, j;
++
++    //fprintf(stderr, "Point gridnew.0\n");
++
++    for (i = x; i < c->mon->gm; i++) {
++        for (j = y; j < c->mon->gn; j++) {
++            //fprintf(stderr, "Point gridnew.1\n");
++            if (gridspace(c->mon, i, j, w, h, false)) {
++            //if (gridfree(c->mon, i, j)) {
++                gridsetpos(c, i, j, w, h);
++                return;
++            }
++        }
++    }
++
++    gridsetpos(c, 0, 0, w, h);
++}
++
++#define HORZ    5
++#define VERT   13
++
++void
++gridtile(Monitor *m)
++{
++    Client *c;
++
++    /* usable width, usable height, horizontal gap, vertical gap, pane width, pane height */
++    int usw, ush, lgap, tgap, hgap, vgap, pw, ph;
++
++    /* TODO:questionable use of -1 */
++    usw = (selmon->mw / HORZ / m->gm - 1) * HORZ * m->gm;
++    ush = (selmon->mh / VERT / m->gn - 1) * VERT * m->gn;
++
++    hgap = 4 * HORZ;
++    vgap = 1 * VERT;
++
++    lgap = (selmon->mw - usw - 2*borderpx + hgap) / 2;
++    tgap = (selmon->mh - ush - 2*borderpx + vgap) / 2;
++
++    pw = usw / m->gm;
++    ph = ush / m->gn;
++
++	for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
++        resize(c, c->gx*pw + lgap, c->gy*ph + tgap, c->gw*pw - hgap, c->gh*ph - vgap, 0);
++    }
++}
++/* END grid */
++
+ int
+ main(int argc, char *argv[])
+ {
