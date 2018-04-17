@@ -1,2 +1,2 @@
 #!/bin/sh
-feh  --bg-fill '/home/david/img/wp/wallpaper' 
+'feh' '--bg-fill' '/home/david/img/wp/wallpaper'

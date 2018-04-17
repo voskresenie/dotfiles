@@ -62,8 +62,8 @@ nnoremap <leader>/ :noh<cr>
 " folds
 set foldmethod=syntax                   " fold based on file's syntax
 set foldlevelstart=99                   " default to nothing folded
-autocmd BufWinLeave *.* mkview          " save folds et al when loading
-autocmd BufWinEnter *.* silent loadview " load folds et al when opening
+" autocmd BufWinLeave *.* mkview          " save folds et al when loading
+" autocmd BufWinEnter *.* silent loadview " load folds et al when opening
 
 " caused problem with arrow keys in insert mode, solved with "nocompatible"
 "set noesckeys
