@@ -5,19 +5,20 @@ SAVEHIST=1000
 bindkey -v
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
-zstyle :compinstall filename '/home/david/.zshrc'
-
-autoload -Uz compinit
-compinit
+## zstyle :compinstall filename '/home/david/.zshrc'
+## 
+## autoload -Uz compinit
+## compinit
 # End of lines added by compinstall
 
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
+alias copy='xsel -i'
 alias diff='diff -aur --color'
 alias git-locate='git ls-files | grep'
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias ls='ls -h --color=auto -N'
 alias mpv='mpv -fs'
-alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii | xsel -i'
+alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii'
 alias screenfetch='screenfetch -c 04,00'
 alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
 alias suvim='sudo -E nvim'

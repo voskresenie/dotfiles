@@ -33,6 +33,9 @@ mpdcron &
 # laptop keys
 xbindkeys &
 
+# swap caps and escape
+setxkbmap -option "caps:swapescape"
+
 # set wallpaper
 ~/.fehbg
 
