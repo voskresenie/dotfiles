@@ -2,19 +2,26 @@
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
+setopt appendhistory
+unsetopt beep
 bindkey -v
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
-## zstyle :compinstall filename '/home/david/.zshrc'
-## 
-## autoload -Uz compinit
-## compinit
+
+zstyle ':completion:*' completer _expand _complete _ignored _approximate
+zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle :compinstall filename '/home/david/.zshrc'
+
+autoload -Uz compinit
+compinit
 # End of lines added by compinstall
 
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
 alias copy='xsel -i'
 alias diff='diff -aur --color'
 alias git-locate='git ls-files | grep'
+alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
+alias hdmi-='xrandr --output HDMI1 --off'
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias ls='ls -h --color=auto -N'
 alias mpv='mpv -fs'
@@ -24,6 +31,12 @@ alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
 alias suvim='sudo -E nvim'
 alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'
 alias vim='nvim'
+
+# adjust font size
+alias font++="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=20:antialias=true:hinting=true\""
+alias font+="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=16:antialias=true:hinting=true\""
+alias font="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=12:antialias=true:hinting=true\""
+alias font-="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=10:antialias=true:hinting=true\""
 
 export EDITOR=nvim
 export GOPATH=$HOME
