@@ -58,7 +58,7 @@ diff -aur a/config.def.h b/config.def.h
  	TAGKEYS(                        XK_3,                      2)
 diff -aur a/dwm.c b/dwm.c
 --- a/dwm.c	2017-07-28 07:15:18.053019124 -0700
-+++ b/dwm.c	2017-07-28 07:15:05.383019433 -0700
++++ b/dwm.c	2019-12-21 12:49:33.445798415 -0800
 @@ -24,6 +24,9 @@
  #include <locale.h>
  #include <signal.h>
@@ -153,12 +153,11 @@ diff -aur a/dwm.c b/dwm.c
  	}
  	/* geometry */
  	c->x = c->oldx = wa->x;
-@@ -2120,6 +2158,129 @@
+@@ -2120,6 +2158,127 @@
  	pop(c);
  }
  
 +/* BEGIN grid */
-+/* BEGIN blackbox */
 +bool
 +gridfree(Monitor *m, int x, int y, bool self)
 +{
@@ -166,8 +165,10 @@ diff -aur a/dwm.c b/dwm.c
 +    if (x < 0 || x >= m->gm || y < 0 || y >= m->gm) return false;
 +
 +    for (c = m->clients; c; c = c->next)
-+        if (ISVISIBLE(c) && x >= c->gx && x < c->gx + c->gw && y >= c->gy && y < c->gy + c->gh && (c != m->sel || !self))
-+            return false;
++        if (ISVISIBLE(c)
++            && x >= c->gx && x < c->gx + c->gw
++            && y >= c->gy && y < c->gy + c->gh
++            && (c != m->sel || !self)) return false;
 +
 +    return true;
 +}
@@ -191,7 +192,6 @@ diff -aur a/dwm.c b/dwm.c
 +    c->gw = w;
 +    c->gh = h;
 +}
-+/* END blackbox */
 +
 +void
 +gridmove(const Arg *arg)
@@ -204,9 +204,9 @@ diff -aur a/dwm.c b/dwm.c
 +    x = c->gx + ((int *)arg->v)[0];
 +    y = c->gy + ((int *)arg->v)[1];
 +
-+    if (gridspace(m, x, y, c->gw, c->gh, true)) {
++    //if (gridspace(m, x, y, c->gw, c->gh, true)) {
 +        gridsetpos(c, x, y, c->gw, c->gh);
-+    }
++    //}
 +
 +    arrange(m);
 +}
@@ -222,9 +222,9 @@ diff -aur a/dwm.c b/dwm.c
 +    w = c->gw + ((int *)arg->v)[0];
 +    h = c->gh + ((int *)arg->v)[1];
 +
-+    if (gridspace(m, c->gx, c->gy, w, h, true)) {
++    //if (gridspace(m, c->gx, c->gy, w, h, true)) {
 +        gridsetpos(c, c->gx, c->gy, w, h);
-+    }
++    //}
 +
 +    arrange(m);
 +}
@@ -234,13 +234,9 @@ diff -aur a/dwm.c b/dwm.c
 +{
 +    unsigned int i, j;
 +
-+    //fprintf(stderr, "Point gridnew.0\n");
-+
 +    for (i = x; i < c->mon->gm; i++) {
 +        for (j = y; j < c->mon->gn; j++) {
-+            //fprintf(stderr, "Point gridnew.1\n");
 +            if (gridspace(c->mon, i, j, w, h, false)) {
-+            //if (gridfree(c->mon, i, j)) {
 +                gridsetpos(c, i, j, w, h);
 +                return;
 +            }
@@ -274,9 +270,11 @@ diff -aur a/dwm.c b/dwm.c
 +    pw = usw / m->gm;
 +    ph = ush / m->gn;
 +
-+	for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
-+        resize(c, c->gx*pw + lgap, c->gy*ph + tgap, c->gw*pw - hgap, c->gh*ph - vgap, 0);
-+    }
++	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
++        resize(c,
++            c->gx*pw + lgap, c->gy*ph + tgap,
++            c->gw*pw - hgap, c->gh*ph - vgap,
++            0);
 +}
 +/* END grid */
 +

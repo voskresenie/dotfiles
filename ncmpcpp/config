@@ -487,7 +487,9 @@ main_window_color = default
 #
 #color2 = green
 #
-main_window_highlight_color = red
+#main_window_highlight_color = red
+current_item_prefix = "$(red)$r"
+current_item_suffix = "$/r$(end)"
 #
 #progressbar_color = black
 #
