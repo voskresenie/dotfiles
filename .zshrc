@@ -16,35 +16,61 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-alias chmodgw='sudo chmod -R ugo+rwX,o-w'
-alias copy='xsel -i'
-alias diff='diff -aur --color'
-alias git-locate='git ls-files | grep'
-alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
-alias hdmi-='xrandr --output HDMI1 --off'
-alias lastscreen='ls ~/ss/*.png | tail -n 1'
-alias ls='ls -h --color=auto -N'
-alias mpv='mpv -fs'
 alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii'
-alias screenfetch='screenfetch -c 04,00'
-alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
+
+# editor
+export EDITOR=nvim
 alias suvim='sudo -E nvim'
-alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'
 alias vim='nvim'
 
-# adjust font size
+# code
+alias git-locate='git ls-files | grep'
+export GOPATH=$HOME
+
+# system
+alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
+alias hdmi-='xrandr --output HDMI1 --off'
+alias red='redshift -l 44.915194:-93.1044794'
+
+# screenshots
+alias lastscreen='ls ~/ss/*.png | tail -n 1'
+alias screenfetch='screenfetch -c 04,00'
+alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
+screengrab() {
+    ffmpeg -f x11grab -s 2560x1440 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
+    ffmpeg -threads 8 -i ~/grab.mkv -crf 10 -b:v 3M ~/grab.webm
+}
+
+# media
+alias chmodgw='sudo chmod -R ugo+rwX,o-w'
+alias media='cd /mnt/media'
+alias mpv='mpv -fs'
+alias ncmpcpp='ncmpcpp -h valhalla'
+
+# gaming
+alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'
+export STEAM_RUNTIME=0
+
+# network
+alias rsync='rsync -a --info=progress2'
+alias svarog='ssh svarog'
+alias valhalla='ssh valhalla'
+
+# terminal
+export PS1='@%m %1~ $ '
+export PATH=$GOPATH/bin:$HOME/bin:$PATH
+source /usr/share/doc/pkgfile/command-not-found.zsh
+
+alias ls='ls -h --color=auto -N'
+alias which='which -a'
+
+alias copy='xsel -i'
+alias diff='diff -aur --color'
+
 alias font++="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=20:antialias=true:hinting=true\""
 alias font+="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=16:antialias=true:hinting=true\""
 alias font="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=12:antialias=true:hinting=true\""
 alias font-="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=10:antialias=true:hinting=true\""
-
-export EDITOR=nvim
-export GOPATH=$HOME
-export PATH=$GOPATH/bin:$HOME/bin:$PATH
-export PS1='@%m %1~ $ '
-export STEAM_RUNTIME=0
-
-source /usr/share/doc/pkgfile/command-not-found.zsh
 
 # Colored man pages: http://linuxtidbits.wordpress.com/2009/03/23/less-colors-for-man-pages/
 # Less Colors for Man Pages
@@ -56,13 +82,12 @@ export LESS_TERMCAP_so=$'\E[38;5;016m\E[48;5;220m'    # begin standout-mode - in
 export LESS_TERMCAP_ue=$'\E[0m'           # end underline
 export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 
-# webm
-screengrab() {
-    ffmpeg -f x11grab -s 2560x1440 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
-    ffmpeg -threads 8 -i ~/grab.mkv -crf 10 -b:v 3M ~/grab.webm
-}
-
 # 4chan-compatible webm
+### usage: webm -i INPUT -o OUTPUT -s START -d DURATION
+###             [-w WIDTH] [-q QUALITY] [-t]
+### START and DURATION must be a time duration
+#            specification, see the Time duration
+#            section in the ffmpeg-utils(1) manual.
 webm() {
     while getopts ":i:o:w:q:s:d:t:" opt; do
       case $opt in
