@@ -45,6 +45,9 @@ compton -b -e .3 --vsync opengl
 # this helps with full screen games
 wmname LG3D
 
+# redshift
+redshift -l 44.915194:-93.1044794 &
+
 # Japanese input
 export GTK_IM_MODULE=ibus
 export XMODIFIERS=@im=ibus
