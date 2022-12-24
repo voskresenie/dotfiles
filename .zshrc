@@ -34,7 +34,7 @@ alias red='redshift -l 44.915194:-93.1044794'
 
 # screenshots
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
-alias screenfetch='screenfetch -c 04,00'
+alias screenfetch='screenfetch -c 04,13'
 alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
 screengrab() {
     ffmpeg -f x11grab -s 2560x1440 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
