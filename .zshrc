@@ -89,7 +89,7 @@ export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 #            specification, see the Time duration
 #            section in the ffmpeg-utils(1) manual.
 webm() {
-    while getopts ":i:o:w:q:s:d:t:" opt; do
+    while getopts ":i:o:w:q:s:d:t" opt; do
       case $opt in
         i) input="$OPTARG"
         ;;
@@ -103,7 +103,7 @@ webm() {
         ;;
         d) duration="$OPTARG"
         ;;
-        t) subtitles="$OPTARG"
+        t) subtitles=true
         ;;
         \?) echo "Invalid option -$OPTARG" >&2
         ;;
@@ -131,14 +131,14 @@ webm() {
     fi
 
     if [ "$subtitles" ]; then
-        enable_subtitles="-vf subtitles=$input"
+        subtitles_opts="-vf subtitles=$input"
     fi
 
     if [ -z "$width" ]; then
         width=960
     fi
 
-    ffmpeg_str="ffmpeg -threads 8 -i $input -codec:v libvpx -vf scale=$width:-1 -crf 10 -b:v 3M -ss $start -t $duration -an -sn $enable_subtitles $output"
+    ffmpeg_str="ffmpeg -threads 8 -i $input -codec:v libvpx -vf scale=$width:-1 -crf 10 -b:v 3M -ss $start -t $duration -an -sn $subtitles_opts $output"
     eval "$ffmpeg_str"
     # TODO: add filesize check, repeat if unsatisfactory
 }
