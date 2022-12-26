@@ -91,22 +91,17 @@ export LESS_TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 webm() {
     while getopts ":i:o:w:q:s:d:t" opt; do
       case $opt in
-        i) input="$OPTARG"
-        ;;
-        o) output="$OPTARG"
-        ;;
-        w) width="$OPTARG"
-        ;;
-        q) quality="$OPTARG"
-        ;;
-        s) start="$OPTARG"
-        ;;
-        d) duration="$OPTARG"
-        ;;
-        t) subtitles=true
-        ;;
+        i) input="$OPTARG" ;;
+        o) output="$OPTARG" ;;
+        w) width="$OPTARG" ;;
+        q) quality="$OPTARG" ;;
+        s) start="$OPTARG" ;;
+        d) duration="$OPTARG" ;;
+        t) subtitles=true ;;
+        :)  echo "Missing argument -$OPTARG" >&2
+            exit 1 ;;
         \?) echo "Invalid option -$OPTARG" >&2
-        ;;
+            exit 1
       esac
     done
 
