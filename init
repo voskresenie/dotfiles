@@ -1,0 +1,105 @@
+#!/usr/bin/env zsh
+# Usage:
+# * TODO - install packages
+# * symlinks - create symlinks for conf files
+# * TODO - set up hosts file
+# * TODO - set up NFS connection in fstab file
+
+#print $1
+#echo "${@:2}"
+#eval "$@"
+
+symlinks() {
+  while getopts ":i:o:f" opt; do
+    case $opt in
+      i) srcdir="$OPTARG" ;;
+      o) dstdir="$OPTARG" ;;
+      f) force=true ;;
+      \?) invalid=true
+        echo "Invalid option -$OPTARG" >&2
+    esac
+  done
+  if [ "$invalid" ]; then
+    exit 1
+  fi
+
+  # how to find symlinks referencing source:
+  # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
+  SYMS=(
+        #dwb/
+        #dwb/searchengines
+        #dwb/settings
+        #dwm/
+        #dwm/dwm-diff.sh
+        #dwm/dwm-grid-6.1.diff
+        #dwm/dwm-svarog-6.1.diff
+        #dwm/PKGBUILD
+        #firefox/
+        #firefox/chrome/
+        #firefox/chrome/userChrome.css
+        #firefox/chrome/userContent.css
+
+        "dunstrc:.config/dunst/dunstrc"
+        ".fehbg:.fehbg"
+        # "fonts.conf:.config/fontconfig/fonts.conf"
+        "htoprc:.config/htop/htoprc"
+        ".inputrc:.inputrc"
+        "mpv.conf:.config/mpv/mpv.conf"
+        "ncmpcpp:.ncmpcpp"
+        ".pam_environment:.pam_environment"
+        ".tmux.conf:.tmux.conf"
+        ".vimrc:.vimrc"
+        ".xbindkeysrc:.xbindkeysrc"
+        ".xinitrc:.xinitrc"
+        "xres:.xres"
+        ".Xresources:.Xresources"
+        ".zprofile:.zprofile"
+        ".zshrc:.zshrc"
+      )
+
+  print "Linking files..."
+  if [ "$force" ]; then
+    print "Overwriting existing files..."
+  fi
+
+  for sym in "${SYMS[@]}" ; do
+    SRC=$srcdir/${sym%%:*}
+    DST=$dstdir/${sym#*:}
+    printf "  %s -> %s" "$SRC" "$DST"
+
+    if [ "$force" ]; then
+      # remove symlink if exists
+      [ -h $DST ] &&
+        ( rm $DST &&
+          printf " : Removed existing symlink" ||
+          printf " : Could not remove existing symlink")
+      # remove file if exists
+      [ -f $DST ] &&
+        ( rm $DST &&
+          printf " : Removed existing file" ||
+          printf " : Could not remove existing file")
+      # remove directory if exists and empty
+      [ -d $DST ] &&
+        ( rmdir $DST &&
+          printf " : Removed existing directory" ||
+          printf " : Could not remove existing directory" )
+    fi
+
+    ( [ -h $DST ] && printf " : Destination symlink exists" ) ||
+      ( [ -f $DST ] && printf " : Destination file exists" ) ||
+      ( [ -d $DST ] && printf " : Destination directory exists" ) &&
+      print " : Skipping" && continue
+
+    mkdir -p $(dirname $DST)
+    ln -s $SRC $DST 2>/dev/null &&
+      print " : Success" ||
+      print " : Cannot create symbolic link"
+  done
+
+  print "Done"
+}
+
+case $1 in
+  symlinks) symlinks -i ~/dotfiles -o ~ "${@:2}" ;;
+  *) echo "Invalid command $1"
+esac
