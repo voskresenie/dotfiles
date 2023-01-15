@@ -1,9 +1,16 @@
 # Lines configured by zsh-newuser-install
+# shell history
 HISTFILE=~/.histfile
 HISTSIZE=1000
-SAVEHIST=1000
-setopt appendhistory
+SAVEHIST=100000
+# setopt inc_append_history
+setopt share_history
+setopt extended_history
+
+# don't error on wildcard no matches
+setopt no_nomatch
 unsetopt beep
+
 bindkey -v
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
@@ -56,7 +63,9 @@ alias rsync='rsync -a --info=progress2'
 alias svarog='ssh svarog'
 alias valhalla='ssh valhalla'
 
-# terminal
+# shell
+setopt auto_cd
+alias .='ls'
 export PS1='@%m %1~ $ '
 export PATH=$GOPATH/bin:$HOME/bin:$PATH
 source /usr/share/doc/pkgfile/command-not-found.zsh
