@@ -177,7 +177,7 @@ visualizer_in_stereo = no
 ## Note: colors can be nested.
 ##
 #
-song_list_format = "{$5%a$9} $1|$9 {$1%t$9} $R {$2%40b$9} $1|$9 {$6%l$9}"
+song_list_format = "{$5%a$9} $1|$9 {$6%t$9} $R {$2%40b$9} $1|$9 {$6%l$9}"
 #
 song_status_format = $8%a$9{ - $8"%t"$9}
 #
@@ -272,7 +272,7 @@ alternative_header_second_line_format = "{$2%b$9} $1|$9 {$6(%y)$9}"
 ##   not available.
 ##
 #
-song_columns_list_format = (20)[red]{a} (30)[magenta]{b} (44)[blue]{t} (7f)[red]{l}
+song_columns_list_format = (20)[blue]{a} (44)[magenta]{t} (30)[red]{b} (7f)[magenta]{l}
 #
 ##### various settings #####
 #
