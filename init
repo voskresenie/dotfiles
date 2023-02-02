@@ -1,15 +1,48 @@
 #!/usr/bin/env zsh
 # Usage:
 # * TODO - install packages
+# * TODO - update packages
 # * symlinks - create symlinks for conf files
 # * TODO - set up hosts file
 # * TODO - set up NFS connection in fstab file
 
-#print $1
-#echo "${@:2}"
-#eval "$@"
+install () {
+  echo "install not implemented" >&2
+
+  # install vundle
+  git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+  vim +BundleInstall +q +q
+}
+
+update () {
+  echo "update not implemented" >&2
+
+  # update packages
+  sudo pacman -Syyu
+  # TODO: add restore to previous date in case of bad upgrade
+  # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
+
+  # update vundle
+  vim +BundleUpdate +q +q
+}
+
+downgrade () {
+  # TODO: read from input
+  date="2022-01-01"
+
+  sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+  mirrorlistcmd="echo \"Server=https://archive.archlinux.org/repos/$(print -r -- ${date//-/\/})/\\\$repo/os/\\\$arch\" > /etc/pacman.d/mirrorlist"
+  sudo sh -c $mirrorlistcmd
+  yes | pacman -Syyuu
+
+  sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+}
 
 symlinks() {
+  # Always include `local OPTIND` in any function that uses `getopts` otherwise
+  #   all `getopts` share a single global OPTIND
+  # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
+  local OPTIND opt
   while getopts ":i:o:f" opt; do
     case $opt in
       i) srcdir="$OPTARG" ;;
@@ -38,6 +71,8 @@ symlinks() {
         #firefox/chrome/
         #firefox/chrome/userChrome.css
         #firefox/chrome/userContent.css
+
+        # TODO: add support for * operator
 
         "dunstrc:.config/dunst/dunstrc"
         ".fehbg:.fehbg"
@@ -99,7 +134,39 @@ symlinks() {
   print "Done"
 }
 
-case $1 in
-  symlinks) symlinks -i ~/dotfiles -o ~ "${@:2}" ;;
-  *) echo "Invalid command $1"
+hosts() {
+  echo "hosts not implemented" >&2
+}
+
+fstab() {
+  echo "fstab not implemented" >&2
+}
+
+# args=()
+# opts=()
+# while [ $OPTIND -le "$#" ]; do
+#   if getopts b: opt; then
+#     case $opt in
+#       b) opts+=("$OPTARG");;
+#     esac
+#   else
+#     args+=("${(P)OPTIND}")
+#     # args+=("${!OPTIND}") -- bash
+#     ((OPTIND++))
+#   fi
+# done
+#
+# echo "${args[@]}"
+# echo "${opts[@]}"
+
+readonly cmd=${1:?"The command must be specified."}
+case $cmd in
+  install) install "${@:2}" ;;
+  upgrade) upgrade "${@:2}" ;;
+  downgrade) downgrade "${@:2}" ;;
+  symlinks) symlinks -i ~/dotfiles -o ~/dotfiles/tmp "${@:2}" ;;
+  hosts) hosts "${@:2}" ;;
+  fstab) fstab "${@:2}" ;;
+  *) echo "Invalid command $cmd" >&2
+    exit 1
 esac
