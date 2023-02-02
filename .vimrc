@@ -20,6 +20,7 @@ let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files']
 Plugin 'rking/ag.vim'
 Plugin 'tpope/vim-fugitive' " git
 
+Plugin 'sebdah/vim-delve'       " go debugger
 Plugin 'fatih/vim-go'           " go
 let g:go_fmt_experimental = 1   " prevent gofmt from destroying folds
 
