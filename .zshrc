@@ -7,6 +7,10 @@ SAVEHIST=100000
 setopt share_history
 setopt extended_history
 
+# with multios set, redirecting output does not prevent it from being piped
+#   eg `echo hello >/dev/null | wc -l` evals to 1 (whereas unset, evals to 0)
+# unsetopt multios
+
 # don't error on wildcard no matches
 setopt no_nomatch
 unsetopt beep
