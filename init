@@ -9,6 +9,10 @@
 install () {
   echo "install not implemented" >&2
 
+  PACKAGES=(
+            "pkgfile"
+           )
+
   # install vundle
   git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
   vim +BundleInstall +q +q
@@ -19,14 +23,18 @@ update () {
 
   # update packages
   sudo pacman -Syyu
-  # TODO: add restore to previous date in case of bad upgrade
-  # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
+  # update package search
+  sudo pacman -Fy
+  sudo pkgfile -u
 
   # update vundle
   vim +BundleUpdate +q +q
 }
 
 downgrade () {
+  # restore to previous date in case of bad upgrade
+  # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
+
   # TODO: read from input
   date="2022-01-01"
 
