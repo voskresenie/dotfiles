@@ -1,3 +1,7 @@
+# $XDG_CONFIG_HOME/ncmpcpp/bindings
+#
+# This file contains custom key bindings for ncmpcpp
+#
 ##########################################################
 ## this is example bindings configuration file, copy it ##
 ## to ~/.ncmpcpp/bindings and set up your preferences   ##

@@ -1,3 +1,7 @@
+# $XDG_CONFIG_HOME/ncmpcpp/config
+#
+# This file contains configuration for ncmpcpp
+#
 ####################################################
 ## this is example configuration file, copy it to ##
 ## ~/.ncmpcpp/config and set up your preferences  ##

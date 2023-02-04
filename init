@@ -1,10 +1,37 @@
 #!/usr/bin/env zsh
+#
+# This script initializes and maintains a system in a standardized format
+#
 # Usage:
 # * TODO - install packages
 # * TODO - update packages
-# * symlinks - create symlinks for conf files
+# * config - copy or symlink conf files
 # * TODO - set up hosts file
 # * TODO - set up NFS connection in fstab file
+#
+REPO_DIR="$(realpath "$(dirname "$0")")"
+source "$REPO_DIR"/global/profile
+source "$REPO_DIR"/profile
+
+PKGNAME=voskarch
+BACKUP_DIR="$XDG_STATE_HOME/$PKGNAME/backup"
+# directory for backing up config files before overwriting
+CFG_BACKUP_DIR="$BACKUP_DIR/cfg"
+
+prereq () {
+  mkdir -p "$BACKUP_DIR" "$CFG_BACKUP_DIR"
+
+  source "$XDG_CONFIG_HOME"/user-dirs.dirs
+  # TODO: this might be doable with xdg-user-dirs-update, unclear
+  mkdir -p "$XDG_DESKTOP_DIR" \
+    "$XDG_DOWNLOAD_DIR" \
+    "$XDG_TEMPLATES_DIR" \
+    "$XDG_PUBLICSHARE_DIR" \
+    "$XDG_DOCUMENTS_DIR" \
+    "$XDG_MUSIC_DIR" \
+    "$XDG_PICTURES_DIR" \
+    "$XDG_VIDEOS_DIR"
+}
 
 install () {
   echo "install not implemented" >&2
@@ -14,7 +41,7 @@ install () {
            )
 
   # install vundle
-  git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+  git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
   vim +BundleInstall +q +q
 }
 
@@ -32,7 +59,7 @@ update () {
 }
 
 downgrade () {
-  # restore to previous date in case of bad upgrade
+  # restore to previous date in case of bad update
   # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
 
   # TODO: read from input
@@ -40,33 +67,31 @@ downgrade () {
 
   sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
   mirrorlistcmd="echo \"Server=https://archive.archlinux.org/repos/$(print -r -- ${date//-/\/})/\\\$repo/os/\\\$arch\" > /etc/pacman.d/mirrorlist"
-  sudo sh -c $mirrorlistcmd
+  sudo sh -c "$mirrorlistcmd"
   yes | pacman -Syyuu
 
   sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
 }
 
-symlinks() {
+config () {
   # Always include `local OPTIND` in any function that uses `getopts` otherwise
   #   all `getopts` share a single global OPTIND
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
   local OPTIND opt
-  while getopts ":i:o:f" opt; do
+  while getopts ":i:o:fc" opt; do
     case $opt in
-      i) srcdir="$OPTARG" ;;
+      i) srcdir="$(realpath "$OPTARG")" ;;
       o) dstdir="$OPTARG" ;;
       f) force=true ;;
-      \?) invalid=true
-        echo "Invalid option -$OPTARG" >&2
+      c) copy=true ;;
+      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
     esac
   done
-  if [ "$invalid" ]; then
-    exit 1
-  fi
 
   # how to find symlinks referencing source:
   # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
-  SYMS=(
+  # TODO: find any files that might take precedence
+  syms=(
         #dwb/
         #dwb/searchengines
         #dwb/settings
@@ -81,65 +106,138 @@ symlinks() {
         #firefox/chrome/userContent.css
 
         # TODO: add support for * operator
+        #"global/environment:/etc/environment"
+        "global/profile:/etc/profile.d/user.sh"
 
-        "dunstrc:.config/dunst/dunstrc"
-        ".fehbg:.fehbg"
-        # "fonts.conf:.config/fontconfig/fonts.conf"
-        "htoprc:.config/htop/htoprc"
-        ".inputrc:.inputrc"
-        "mpv.conf:.config/mpv/mpv.conf"
-        "ncmpcpp:.ncmpcpp"
-        ".pam_environment:.pam_environment"
-        ".tmux.conf:.tmux.conf"
-        ".vimrc:.vimrc"
-        ".xbindkeysrc:.xbindkeysrc"
-        ".xinitrc:.xinitrc"
-        "xres:.xres"
-        ".Xresources:.Xresources"
-        ".zprofile:.zprofile"
-        ".zshrc:.zshrc"
+        "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
+        "fehbg:$XDG_CONFIG_HOME/fehbg"
+        #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+        "htoprc:$XDG_CONFIG_HOME/htop/htoprc"
+        "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
+        "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
+        "mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
+        # TODO: replace with ncmpcpp/*
+        "ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
+        "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
+        "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
+        ".pam_environment:$HOME/.pam_environment"                      # TODO: make xdg-compliant
+        "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
+        "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
+        "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
+        "vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+        "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
+        ".xbindkeysrc:$HOME/.xbindkeysrc"                              # TODO: make xdg-compliant
+        "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
+        "xres/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+        "xres/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+        "xresources:$XDG_CONFIG_HOME/X11/xresources"
+        "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
+        "zshrc:$HOME/.zshrc"                                           # TODO: make xdg-compliant
       )
 
-  print "Linking files..."
-  if [ "$force" ]; then
-    print "Overwriting existing files..."
-  fi
+  [ "$copy" = true ] && print ":: Copying files..." || print ":: Linking files..."
+  [ "$force" = true ] &&
+    print ":: Overwriting existing files with -f"
 
-  for sym in "${SYMS[@]}" ; do
-    SRC=$srcdir/${sym%%:*}
-    DST=$dstdir/${sym#*:}
-    printf "  %s -> %s" "$SRC" "$DST"
+  for (( i=1 ; i<=${#syms[@]} ; i++ )); do
+    src="$(realpath -ms "$srcdir/${syms[$i]%%:*}")"
+    dst="$(realpath -ms "$dstdir/${syms[$i]#*:}")"
+    printf "(%d/%d) %s -> %s\n" "$i" "${#syms[@]}" "$src" "$dst"
 
-    if [ "$force" ]; then
-      # remove symlink if exists
-      [ -h $DST ] &&
-        ( rm $DST &&
-          printf " : Removed existing symlink" ||
-          printf " : Could not remove existing symlink")
-      # remove file if exists
-      [ -f $DST ] &&
-        ( rm $DST &&
-          printf " : Removed existing file" ||
-          printf " : Could not remove existing file")
-      # remove directory if exists and empty
-      [ -d $DST ] &&
-        ( rmdir $DST &&
-          printf " : Removed existing directory" ||
-          printf " : Could not remove existing directory" )
+    # find last element of path that already exists
+    d="$dst"
+    while [ ! -e "$d" ] || [ -h "$d" ]; do
+      d="$(dirname "$d")"
+    done
+
+    # TODO: copy owner from file if already present, or directory if not
+    # maybe not needed because files are just me / root
+    #user=$(stat -c '%U' "$d")
+    #group=$(stat -c '%G' "$d")
+
+    [ -h "$dst" ] && filetype="symlink" ||
+      { [ -d "$dst" ] && filetype="directory" } ||
+      { [ -f "$dst" ] && filetype="file" }
+
+    cmp --silent "$src" "$dst" &&
+      { { [ -h "$dst" ] && [ "$(readlink -f "$dst")" = "$src" ] &&
+          printf ":: Destination is symlink to source, " } ||
+        { [ ! -h "$dst" ] &&
+          printf ":: Destination and source are identical, " } } &&
+      { [ "$force" = true ] && print "overwriting anyway with -f" ||
+        { print "skipping" && continue } }
+
+    overwrite= # reset in case set by previous iterations
+    if [ -e "$dst" ]; then
+      [ ! "$force" = true ] &&
+        while true; do
+          printf ":: Destination $filetype $(basename "$dst") exists, overwrite? (y/N) "
+          read yn
+          case $yn in
+            [Yy]|Yes|yes )
+              break ;;
+            [Nn]|No|no|"" )
+              print ":: Skipping..."
+              continue 2 ;;
+            * ) ;;
+          esac
+        done
+
+      # TODO: figure out how to handle symlinks with copying with backups
+      # -- currently copies contents into symlink
+      cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered \
+          --parents "$dst" "$CFG_BACKUP_DIR" &&
+        print ":: Backed up $filetype to $(realpath "$CFG_BACKUP_DIR/$dst")" ||
+        while true; do
+          printf ":: Failed to back up $filetype, "
+          [ "$force" = true ] && print "overwriting anyway with -f" && break ||
+            printf "overwrite anyway? (y/N) "
+          read yn
+          case $yn in
+            [Yy]|Yes|yes )
+              break ;;
+            [Nn]|No|no|"" )
+              print ":: Skipping..."
+              continue 2 ;;
+            * ) ;;
+          esac
+        done
+      overwrite=true
     fi
 
-    ( [ -h $DST ] && printf " : Destination symlink exists" ) ||
-      ( [ -f $DST ] && printf " : Destination file exists" ) ||
-      ( [ -d $DST ] && printf " : Destination directory exists" ) &&
-      print " : Skipping" && continue
+    sudo= # need to unset in case set on previous iteration
+    if [ ! -w "$d" ]; then
+      while [ -z "$root" ]; do
+        printf ":: Missing write access for destination $d, continue as root? (Y/n) "
+        read yn
+        case $yn in
+          [Yy]|Yes|yes|"" )
+            root=true
+            break ;;
+          [Nn]|No|no )
+            root=false
+            break ;;
+          * ) ;;
+        esac
+      done
 
-    mkdir -p $(dirname $DST)
-    ln -s $SRC $DST 2>/dev/null &&
-      print " : Success" ||
-      print " : Cannot create symbolic link"
+      [ "$root" = true ] && sudo="sudo -E" ||
+          {print ":: Root access required, skipping..." && continue }
+    fi
+
+    eval "$sudo mkdir -p \"$(dirname "$dst")\""
+    eval "$sudo cp \"$src\" \"$dst\" \
+        $( [ -h "$dst" ] && echo "--remove-destination") \
+        $( [ "$overwrite" = true ] && echo "-f") \
+        $( [ "$copy" = true ] || echo "-s") \
+        2>/dev/null" &&
+      { [ "$copy" = true ] &&
+        print ":: Copied file" ||
+        print ":: Created symbolic link" } ||
+      { [ "$copy" = true ] &&
+        print ":: Could not copy file" ||
+        print ":: Could not create symbolic link" }
   done
-
-  print "Done"
 }
 
 hosts() {
@@ -168,11 +266,12 @@ fstab() {
 # echo "${opts[@]}"
 
 readonly cmd=${1:?"The command must be specified."}
+prereq
 case $cmd in
   install) install "${@:2}" ;;
-  upgrade) upgrade "${@:2}" ;;
+  update) update "${@:2}" ;;
   downgrade) downgrade "${@:2}" ;;
-  symlinks) symlinks -i ~/dotfiles -o ~/dotfiles/tmp "${@:2}" ;;
+  config) config -i "$REPO_DIR" -o / "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
   *) echo "Invalid command $cmd" >&2

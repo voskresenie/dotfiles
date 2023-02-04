@@ -1,3 +1,7 @@
+# $HOME/.zshrc
+#
+# This file contains configuration for zsh
+#
 # Lines configured by zsh-newuser-install
 # shell history
 HISTFILE=~/.histfile
@@ -43,6 +47,10 @@ alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
 alias hdmi-='xrandr --output HDMI1 --off'
 alias red='redshift -l 44.915194:-93.1044794'
 
+# packages
+alias pacinfo='pacman -Q --info'
+alias pacrm='sudo pacman -Rs'
+
 # screenshots
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias screenfetch='screenfetch -c 04,13'
@@ -56,7 +64,7 @@ screengrab() {
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
 alias media='cd /mnt/media'
 alias mpv='mpv -fs'
-alias ncmpcpp='ncmpcpp -h valhalla'
+#alias ncmpcpp='ncmpcpp -h valhalla'
 
 # gaming
 alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'

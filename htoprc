@@ -1,3 +1,7 @@
+# $XDG_CONFIG_HOME/htop/htoprc
+#
+# This file contains configuration for htop
+#
 # Beware! This file is rewritten by htop when settings are changed in the interface.
 # The parser is also very primitive, and not human-friendly.
 fields=0 48 17 18 38 39 40 2 46 47 49 1 
