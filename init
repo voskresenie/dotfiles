@@ -33,6 +33,27 @@ prereq () {
     "$XDG_VIDEOS_DIR"
 }
 
+init () {
+  if [ "$REPO_DIR" != "$(realpath -m "$XDG_DATA_HOME/$PKGNAME")" ]; then
+    while true; do
+      printf ":: repo located at $REPO_DIR; move to $XDG_DATA_HOME/$PKGNAME? (y/N) "
+      read yn
+      case $yn in
+        [Yy]|Yes|yes )
+          mkdir -p "$XDG_DATA_HOME"
+          cp -r "$REPO_DIR" "$XDG_DATA_HOME/$PKGNAME"
+          cd "$XDG_DATA_HOME/$PKGNAME"
+          rm -rf "$REPO_DIR"
+          REPO_DIR="$XDG_DATA_HOME/$PKGNAME"
+          print ":: new repo location: $REPO_DIR"
+          break ;;
+        [Nn]|No|no|"" ) break ;;
+        * ) ;;
+      esac
+    done
+  fi
+}
+
 install () {
   echo "install not implemented" >&2
 
@@ -268,6 +289,7 @@ fstab() {
 readonly cmd=${1:?"The command must be specified."}
 prereq
 case $cmd in
+  init) init "${@:2}" ;;
   install) install "${@:2}" ;;
   update) update "${@:2}" ;;
   downgrade) downgrade "${@:2}" ;;
