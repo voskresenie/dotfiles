@@ -16,7 +16,7 @@ xresources="${XDG_CONFIG_HOME:-~/.config}/X11/xresources"
 [[ -f "$xresources" ]] && xrdb -merge "$xresources"
 
 # status bar
-$HOME/bin/xstat &
+$HOME/bin/xstat -r .01s &
 
 # turn off screen blanking
 xset dpms 0 0 0
