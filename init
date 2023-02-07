@@ -158,6 +158,8 @@ config () {
         "xresources:$XDG_CONFIG_HOME/X11/xresources"
         "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
         "zshrc:$HOME/.zshrc"                                           # TODO: make xdg-compliant
+
+        "bin/xstat:$HOME/bin/xstat"
       )
 
   [ "$copy" = true ] && print ":: Copying files..." || print ":: Linking files..."

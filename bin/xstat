@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+#
+# $HOME/bin
+#
+# This script generates a statusbar for Xorg using xsetroot. It includes several
+# components separated by a delimiter
+#
+# usage: xstat [-d delimiter] [-r refreshrate]
+#
+while getopts ":d:r:" opt; do
+  case $opt in
+    d) d="$OPTARG" ;;
+    r) r="$OPTARG" ;;
+    \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+  esac
+done
+readonly delimiter="${d:-  |  }"
+readonly refreshrate="${r:-.01s}"
+while true; do
+  nowplaying="$(mpc current -f "NOW PLAYING : %artist% - %title%" | sed -n 's/$/'$delimiter'/p')"
+  vol="$(amixer sget Master | sed -n '0,/.*\[\([[:digit:]]\{1,3\}%\)\].*/ s//VOLUME \1'$delimiter'/p')"
+  battery="$(acpi -b | sed -n 's/.*, \([[:digit:]]\{1,3\}%\).*/BATTERY \1'$delimiter'/p')"
+  backlight="$(xbacklight -get | sed -n 's/\([[:digit:]]\{1,3\}\)\.[[:digit:]]*/BRIGHTNESS \1%'$delimiter'/p')"
+  clock="$(date +"%^a %d %^b %Y %l:%M:%S %p")"
+
+  xsetroot -name "${nowplaying}${vol}${battery}${backlight}${clock}"
+  sleep $refreshrate
+done

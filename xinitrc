@@ -16,15 +16,7 @@ xresources="${XDG_CONFIG_HOME:-~/.config}/X11/xresources"
 [[ -f "$xresources" ]] && xrdb -merge "$xresources"
 
 # status bar
-while true; do
-  nowplaying=$(mpc -f "Now Playing: %artist% - %title%" | egrep Now\ Playing: | awk 'sub(/Now Playing:/,"") { print $N, "  |   " }' | tr '[:lower:]' '[:upper:]')
-
-  vol=$(amixer sget Master | egrep Left: | awk -F "[][]" '{ print "VOL", $2, "  |   " }')
-  battery=$(acpi -b | awk -F ", " '{print "BAT", $2, "  |   "}')
-
-  xsetroot -name "${nowplaying}${vol}${battery}$(date +"%^a %d %^b %Y %l:%M:%S %p")"
-  sleep .01s
-done &
+$HOME/bin/xstat &
 
 # turn off screen blanking
 xset dpms 0 0 0
