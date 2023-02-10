@@ -57,13 +57,47 @@ init () {
 install () {
   echo "install not implemented" >&2
 
-  PACKAGES=(
-            "pkgfile"
-           )
+  sudo pacman -Syyu
+  pkgs=(pkgfile nano)
+  sudo pacman -S "$pkgs[@]"
+  abs
 
   # install vundle
-  git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
-  vim +BundleInstall +q +q
+  if [ ! -d "$XDG_DATA_HOME"/vim/bundle/Vundle.vim ]; then
+    git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
+    vim +BundleInstall +q +q
+  fi
+}
+
+# abs installs new packages and upgrades existing packages
+abs () {
+  mkdir -p $HOME/abs
+  pkgs=(package-query)
+  for pkg in "$pkgs[@]"; do
+    cd $HOME/abs
+    [ ! -d "$pkg" ] && git clone https://aur.archlinux.org/"$pkg".git
+    cd "$pkg"
+    git pull
+    less PKGBUILD
+    while true; do
+      printf ":: Build package $pkg? (y/n/V) "
+      read yn
+      case $yn in
+        [Yy]|Yes|yes )
+          break ;;
+        [Nn]|No|no|"" )
+          print ":: Skipping..."
+          continue 2 ;;
+        [Vv]|View|view )
+          less PKGBUILD ;;
+        * ) ;;
+      esac
+    done
+    # there should be a better way to do this, so that the package isn't rebuilt
+    # if src hasn't changed, but I'm too lazy to figure it out right now.
+    makepkg -isc
+    git clean -fd
+  done
 }
 
 # runs before update to save current state
@@ -77,6 +111,8 @@ update () {
 
   # update packages
   sudo pacman -Syyu
+  abs
+
   # update package search
   sudo pacman -Fy
   sudo pkgfile -u
@@ -298,6 +334,7 @@ prereq
 case $cmd in
   init) init "${@:2}" ;;
   install) install "${@:2}" ;;
+  abs) abs "${@:2}" ;;
   backup) backup "${@:2}" ;;
   update) update "${@:2}" ;;
   restore) restore "${@:2}" ;;
