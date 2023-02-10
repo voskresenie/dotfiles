@@ -56,6 +56,7 @@ alias initpkgsums='makepkg -g >> PKGBUILD'
 
 # screenshots
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
+alias vlastscreen='feh "$(ls ~/ss/*.png | tail -n 1)"'
 alias screenfetch='screenfetch -c 04,13'
 alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
 screengrab() {
