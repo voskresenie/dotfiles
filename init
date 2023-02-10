@@ -132,6 +132,7 @@ config () {
 
         # TODO: add support for * operator
         #"global/environment:/etc/environment"
+        "global/pacman.conf:/etc/pacman.conf"
         "global/profile:/etc/profile.d/user.sh"
 
         "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
