@@ -1,0 +1,20 @@
+pkgname=mpdlib
+pkgver=0.0.1
+pkgrel=1
+arch=('any')
+source=(${pkgname}
+        ${pkgname}conf.example
+        ${pkgname}.1
+        ${pkgname}.conf.5)
+md5sums=('bb75bb94e7dc0821eb053740c069bebc'
+         'd7fd8ff34b208bbbd7d37c9bc47bf5ef'
+         'a8686c7185d8cc4eb482e8d3b33adb47'
+         '976c2dac630a00cd1e7923166ec96750')
+depends=(mpd)
+
+package() {
+  install -vDm 755 "${srcdir}/mpdlib" -t "${pkgdir}/usr/bin"
+  install -vDm 644 "${srcdir}/${pkgname}conf.example" -t "${pkgdir}/usr/share/doc/${pkgname}/"
+  install -vDm 644 "${srcdir}/${pkgname}.1" -t "${pkgdir}/usr/share/man/man1"
+  install -vDm 644 "${srcdir}/${pkgname}.conf.5" -t "${pkgdir}/usr/share/man/man5"
+}

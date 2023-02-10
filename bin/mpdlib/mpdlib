@@ -7,7 +7,7 @@
 #
 # Configuration is set via `mpdlib.conf`. The script first searches for it at
 # ${XDG_CONFIG_HOME:~/.config}/mpd/mpdlib.conf then at /etc/mpd.d/mpdlib.conf.
-# Note that when running at a system level, only /etc/mpd.d/mpdlib.conf et all
+# Note that when running at a global level, only /etc/mpd.d/mpdlib.conf et all
 # will be used.
 #
 # This conf specifies both where the user wants the generated mpd.conf file to
@@ -31,34 +31,34 @@
 #   state_file              ${XDG_CONFIG_HOME:~/.config}/mpd/state_{library_name}
 #
 # By default, mpdlib will look for a running mpd service process first at the
-# system level followed by the user level, and choose between system / user
+# global level followed by the user level, and choose between global / user
 # based on that. If mpd is not running, mpdlib will check whether mpd is enabled
-# at the user or system level at $XDG_CONFIG_HOME/systemd/user/default.target.wants/mpd.service
+# at the user or global level at $XDG_CONFIG_HOME/systemd/user/default.target.wants/mpd.service
 # and /etc/systemd/system/multi-user.target.wants/mpd.service respectively. If
 # mpd is not running or enabled, mpdlib will default to user level if run by a
-# normal user, and system level if run by root. However, it is possible to
-# override this behavior with the flags -u and -s.
+# normal user, and global level if run by root. However, it is possible to
+# override this behavior with the flags -u and -g.
 #
-# Usage: mpdlib [-usv] LIBRARY
+# Usage: mpdlib [-usv] [LIBRARY]
 #
 # Outstanding issues:
 # - doesn't work if there aren't existing configs for the fields we want to write in
 # - doesn't actually support the library-level mpd.conf feature yet
 # - doesn't support parameters other than the handful specified here
 #
-usage="Usage: $0 [-usv] [LIBRARY]"
+usage="Usage: $0 [-ugv] [LIBRARY]"
 
  help="Usage: $0 [OPTION]... [LIBRARY]\n\n"
 help+="  -u   run at user level\n"
-help+="  -s   run at system level\n"
+help+="  -g   run at global level\n"
 help+="  -v   verbose logging\n"
 
 args=()
 while [ $OPTIND -le "$#" ]; do
-  if getopts :usvh opt; then
+  if getopts :ugvh opt; then
     case $opt in
       u) user=true ;;
-      s) user=false ;;
+      g) user=false ;;
       v) verbose=true ;;
       h) print "$help" && exit 0 ;;
       \?) print "$0: invalid option -$OPTARG\n$usage" >&2 && exit 1 ;;
@@ -72,7 +72,7 @@ done
 readonly library="$args[1]"
 [ "$verbose" = true ] && print ":: Switching to library $library"
 
-# if no -s or -u option given, infer user/system level from:
+# if no -g or -u option given, infer user/global level from:
 # 1) running mpd process
 [ -z "$user" ] || [ "$user" = true ] &&
   { { systemctl status --user mpd | grep Tasks\: && systemd=true } ||

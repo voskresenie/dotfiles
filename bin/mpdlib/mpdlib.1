@@ -1,0 +1,53 @@
+.TH MPDLIB 1 "10 Feb 2023" "0.1" "MPD Multi-Library Support"
+
+.SH NAME
+mpdlib \- manage multiple mpd libraries
+
+.SH SYNOPSIS
+mpdlib [-ugv] [LIBRARY]
+
+.SH DESCRIPTION
+.PP
+\fBmpdlib\fR allows for switching between multiple libraries in mpd relatively
+seamlessly.
+.PP
+Configuration is set via \fBmpdlib.conf(5)\fR\&. The script first searches for
+it at \fB${XDG_CONFIG_HOME:~/.config}/mpd/mpdlib.conf\fR then at
+\fB/etc/mpd.d/mpdlib.conf\fR\&. Note that when running at a global level, only
+\fB/etc/mpd.d/mpdlib.conf\fR will be used.
+.PP
+By default, \fBmpdlib\fR will look for a running \fBmpd\fR service process first
+at the user level followed by the global level, and choose whether to operate at
+the user or global level based on that. If \fBmpd\fR is not running,
+\fBmpdlib\fR will check whether \fBmpd\fR is enabled at the user or global level
+at \fB$XDG_CONFIG_HOME/systemd/user/default.target.wants/mpd.service\fR
+and \fB/etc/systemd/system/multi-user.target.wants/mpd.service\fR respectively.
+If \fBmpd\fR is not running or enabled, \fBmpdlib\fR will default to user level
+if run by a normal user and global level if run by root. However, it is possible
+to override this behavior with the flags \fB-u\fR and \fB-s\fR\&.
+.SH OPTIONS
+.TP
+\fB\-u\fR, \fB\-\-user\fR
+configure mpd at user level
+.TP
+\fB\-g\fR, \fB\-\-global\fR
+configure at global level
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+explain what is being done
+.SH SEE ALSO
+\fBmpdlib.conf(5)\fR, \fBmpd(1)\fR, \fBmpd.conf(5)\fR
+
+.SH KNOWN ISSUES
+.IP \(bu 2
+existing configs must exist in \fBmpd.base.conf\fP\& for any parameters defined
+in library configurations.
+.IP \(bu 2
+library-level \fBmpd.conf\fP is not supported yet.
+.IP \(bu 2
+parameters other than the handful specified in \fBmpdlib.conf(5)\fP are not
+supported yet.
+.IP \(bu 2
+long options (eg --user) not supported yet.
+.SH AUTHOR
+David Anderson (voskresenie)
