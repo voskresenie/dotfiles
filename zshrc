@@ -51,6 +51,8 @@ alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 # packages
 alias pacinfo='pacman -Q --info'
 alias pacrm='sudo pacman -Rs'
+alias makepkg-rebuild='makepkg -fi'
+alias initpkgsums='makepkg -g >> PKGBUILD'
 
 # screenshots
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
