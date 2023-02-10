@@ -1,0 +1,233 @@
+#!/usr/bin/env zsh
+#
+# mpdlib
+#
+# This script allows for switching between multiple libraries in mpd relatively
+# seamlessly.
+#
+# Configuration is set via `mpdlib.conf`. The script first searches for it at
+# ${XDG_CONFIG_HOME:~/.config}/mpd/mpdlib.conf then at /etc/mpd.d/mpdlib.conf.
+# Note that when running at a system level, only /etc/mpd.d/mpdlib.conf et all
+# will be used.
+#
+# This conf specifies both where the user wants the generated mpd.conf file to
+# live as well as the location of the base conf which sets fallback values for
+# any parameters not set in the mpdlib conf for the library, except for several
+# fields which must be separate for the concept of switching libraries to make
+# sense.
+#
+# A library config requires the `name` field as well as either `music_directory`
+# or `mpd_conf` with a path to a config file to use for the library, which will
+# fall back to the base mpd.conf file if a parameter is unset. An additional
+# optional parameter `ignore_base_conf` (default `false`) will suppress this
+# functionality.
+#
+# The following fields will use sensible defaults rather than falling back to
+# the value set in base_mpd_conf:
+#
+#   parameter               default
+#   playlist_directory      <empty>
+#   db_file                 ${XDG_CONFIG_HOME:~/.config}/mpd/database_{library_name}
+#   state_file              ${XDG_CONFIG_HOME:~/.config}/mpd/state_{library_name}
+#
+# By default, mpdlib will look for a running mpd service process first at the
+# system level followed by the user level, and choose between system / user
+# based on that. If mpd is not running, mpdlib will check whether mpd is enabled
+# at the user or system level at $XDG_CONFIG_HOME/systemd/user/default.target.wants/mpd.service
+# and /etc/systemd/system/multi-user.target.wants/mpd.service respectively. If
+# mpd is not running or enabled, mpdlib will default to user level if run by a
+# normal user, and system level if run by root. However, it is possible to
+# override this behavior with the flags -u and -s.
+#
+# Usage: mpdlib [-usv] LIBRARY
+#
+# Outstanding issues:
+# - doesn't work if there aren't existing configs for the fields we want to write in
+# - doesn't actually support the library-level mpd.conf feature yet
+# - doesn't support parameters other than the handful specified here
+#
+usage="Usage: $0 [-usv] [LIBRARY]"
+
+ help="Usage: $0 [OPTION]... [LIBRARY]\n\n"
+help+="  -u   run at user level\n"
+help+="  -s   run at system level\n"
+help+="  -v   verbose logging\n"
+
+args=()
+while [ $OPTIND -le "$#" ]; do
+  if getopts :usvh opt; then
+    case $opt in
+      u) user=true ;;
+      s) user=false ;;
+      v) verbose=true ;;
+      h) print "$help" && exit 0 ;;
+      \?) print "$0: invalid option -$OPTARG\n$usage" >&2 && exit 1 ;;
+    esac
+  else
+    args+=("${(P)OPTIND}")
+    ((OPTIND++))
+  fi
+done
+
+readonly library="$args[1]"
+[ "$verbose" = true ] && print ":: Switching to library $library"
+
+# if no -s or -u option given, infer user/system level from:
+# 1) running mpd process
+[ -z "$user" ] || [ "$user" = true ] &&
+  { { systemctl status --user mpd | grep Tasks\: && systemd=true } ||
+    pgrep -u "${SUDO_USER:-$USER}" mpd } >/dev/null && running=true && [ -z "$user" ] && user=true
+[ -z "$user" ] || [ "$user" = false ] &&
+  { { systemctl status mpd | grep Tasks\: && systemd=true } ||
+    pgrep -u root,mpd mpd } >/dev/null && running=true && [ -z "$user" ] && user=false
+
+# 2) enabled mpd process
+[ -z "$user" ] &&
+  # this line prints something to stdout for some reason. need to suppress
+  { systemctl status --user mpd.service | grep enabled && user=true } ||
+  { systemctl status mpd.service | grep enabled && user=false }
+
+# 3) user running script
+[ -z "$user" ] && { [ "$EUID" = 0 ] && [ -z "$user" ] && { user=false || user=true } }
+
+user_conf="$XDG_CONFIG_HOME/mpd/mpdlib.conf"
+sys_conf="/etc/mpdlib.conf"
+[ "$user" = true ] && [ -e "$user_conf" ] && conf="$user_conf" ||
+  { [ -e "$sys_conf" ] && conf="$sys_conf" }
+
+[ -e "$conf" ] || { print ":: Missing config file $conf" >&2 && exit 1 }
+[ "$verbose" = true ] && print ":: Using config $conf"
+
+test_param_line () {
+  [[ $2 =~ ^$1[[:space:]]*\".*\"[[:space:]]*(\#.*)?$ ]] && return 0 || return 1
+}
+
+sed_exp () {
+  print $2 | sed -n 's/'${1}'\s*"\(.*\)"\s*\(#.*\)\?/\1/p'
+}
+
+declare -A libcfg
+libcfg_fields=(name
+               default
+               mpd_conf
+               music_directory
+               playlist_directory
+               db_file
+               state_file)
+
+(( i=0 ))
+while read -r line; do
+  (( i++ ))
+  [[ $line =~ ^\#.*$ ]] || [ -z "$line" ] && continue
+
+  [[ $line =~ ^library[[:space:]]*'\{'[[:space:]]*(\#.*)?$ ]] && inlibcfg=true && continue
+
+  if [ "$inlibcfg" != true ]; then
+    test_param_line base_mpd_conf "$line" &&
+      base_mpd_conf=$(sed_exp base_mpd_conf "$line") &&
+      continue
+
+    test_param_line mpd_conf "$line" &&
+      mpd_conf=$(sed_exp mpd_conf "$line") &&
+      continue
+
+    print ":: Malformed config at line $i" >&2 && exit 1
+  fi
+
+  if [[ $line =~ ^'\}'[[:space:]]*(\#.*)?$ ]]; then
+    { [ "$libcfg[name]" = "$library" ] ||
+      { [ -z "$library" ] && [ "$libcfg[default]" = true ] } } && break
+    inlibcfg=false
+    libcfg=( )
+  fi
+
+  for field in $libcfg_fields[@]; do
+    test_param_line $field $line &&
+      libcfg[$field]="$(sed_exp $field $line)" &&
+      continue
+  done
+done < "$conf"
+
+[ -z "$mpd_conf" ] &&
+  print ":: Missing required config parameter mpd_conf" >&2 && exit 1
+[ -z "$base_mpd_conf" ] &&
+  print ":: Missing required config parameter base_mpd_conf" >&2 && exit 1
+[ -n "$library" ] && [ "$libcfg[name]" != "$library" ] &&
+  print ":: No config for library $library" >&2 && exit 1
+[ -z "$library" ] && [ "$libcfg[default]" != true ] &&
+  print ":: No default library config set" >&2 && exit 1
+[ "$verbose" = true ] &&
+  { { [ -z "$library" ] && [ "$libcfg[default]" = true ] && print ":: Found default library config" } ||
+    { [ "$libcfg[name]" = "$library" ] && print ":: Found library config for $library"} }
+[ -z "$libcfg[mpd_conf]" ] && [ -z "$libcfg[music_directory]" ] &&
+  print ":: Invalid config for $([ -n "$library" ] && print "library $library" || print "default library"): must define either mpd_conf or music_directory" >&2 && exit 1
+
+parse_path () {
+  local val="$1"
+  # I don't know why the fuck this works, but it does
+  val=$(print "$val" | sed -n 's/\(.*\)/printf "\1"/gep')
+  # need to replace ~ in a separate step in case original conf has var defaults
+  # that use ~ (eg ${VAR:-~/...})
+  print "${val/#\~/$HOME}" | sed -n 's/\(.*\)/printf "\1"/gep'
+}
+
+   base_mpd_conf="$(parse_path "$base_mpd_conf")"
+        mpd_conf="$(parse_path "$mpd_conf")"
+libcfg[mpd_conf]="$(parse_path "$libcfg[mpd_conf]")"
+
+[ -z "$libcfg[name]" ] && suffix= || suffix="_$libcfg[name]"
+libcfg[name]=&&libcfg[default]=
+
+   libcfg[music_directory]="$(parse_path "${libcfg[music_directory]:-"$XDG_CONFIG_HOME/mpd/library$suffix"}")"
+libcfg[playlist_directory]="$(parse_path "${libcfg[playlist_directory]:-"$XDG_CONFIG_HOME/mpd/playlists$suffix"}")"
+           libcfg[db_file]="$(parse_path "${libcfg[db_file]:-"$XDG_CONFIG_HOME/mpd/database$suffix"}")"
+        libcfg[state_file]="$(parse_path "${libcfg[state_file]:-"$XDG_CONFIG_HOME/mpd/state$suffix"}")"
+
+if [ "$verbose" = true ]; then
+  print ":: Using base mpd config $base_mpd_conf"
+  for key in "${(k)libcfg[@]}"; do
+    [ -n "$libcfg[$key]" ] && print ":: Setting parameter \`$key\` to $libcfg[$key]"
+  done
+fi
+
+if [ ! -w "$mpd_conf" ]; then
+  while true; do
+    printf ":: Missing write access for $mpd_conf, continue as root? (Y/n) "
+    read yn
+    case $yn in
+      [Yy]|Yes|yes|"" )
+        root=true
+        owner=$(stat -c '%u,%g' "$mpd_conf")
+        break ;;
+      [Nn]|No|no )
+        break ;;
+      * ) ;;
+    esac
+  done
+fi
+
+[ "$verbose" = true ] && print ":: Writing mpd config to $mpd_conf"
+
+rm "$mpd_conf" && touch "$mpd_conf"
+print "# NOTE: This file is autogenerated by \`mpdlib\` and should not be edited directly" >> $mpd_conf
+print "# See \`man mpdlib\` for more details.\n" >> $mpd_conf
+
+sedargs=()
+for key in ${(k)libcfg}; do
+  [ -z "$libcfg[$key]" ] && continue
+  { [ "$key" = "name" ] || [ "$key" = "default" ] } && continue
+
+  escaped_val="$(print "$libcfg[$key]" | sed -e 's/[]\/$*.^[]/\\&/g')"
+  sedargs+=(-e "/$key\s*\".*\"/ s/\".*\"/\"$escaped_val\"/")
+done
+cat $base_mpd_conf | sed "${sedargs[@]}" >> "$mpd_conf"
+
+# restart mpd if running
+if [ "$running" = true ]; then
+  if [ "$systemd" = true ]; then
+    [ "$verbose" = true ] && printf ":: mpd currently running via systemd, restarting" &&
+      { [ "$user" = true ] && print " with --user flag" || print }
+    systemctl restart mpd $([ "$user" = true ] && printf "--user") &&
+      [ "$verbose" = true ] && print ":: mpd restarted"
+  fi
+fi
