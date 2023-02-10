@@ -47,6 +47,7 @@ export GOPATH=$HOME
 alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
 alias hdmi-='xrandr --output HDMI1 --off'
 alias red='redshift -l 44.915194:-93.1044794'
+alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 
 # packages
 alias pacinfo='pacman -Q --info'
