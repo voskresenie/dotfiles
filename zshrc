@@ -7,8 +7,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=100000
-# setopt inc_append_history
-setopt share_history
+setopt inc_append_history
 setopt extended_history
 
 # with multios set, redirecting output does not prevent it from being piped
