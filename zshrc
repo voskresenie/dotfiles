@@ -41,7 +41,8 @@ alias vim='nvim'
 export GOPATH=$HOME
 
 # system
-alias hdmi+='xrandr --output HDMI1 --same-as eDP1 --scale-from 2560x1440 --auto'
+alias hdmi+='xrandr --output HDMI1 --auto --above eDP1'
+alias hdmi+mirror='xrandr --output HDMI1 --auto --same-as eDP1 --scale-from 1920x1080'
 alias hdmi-='xrandr --output HDMI1 --off'
 alias red='redshift -l 44.915194:-93.1044794'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
