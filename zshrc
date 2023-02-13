@@ -38,6 +38,7 @@ alias suvim='sudo -E nvim'
 alias vim='nvim'
 
 # code
+alias g=git
 export GOPATH=$HOME
 
 # system

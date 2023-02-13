@@ -8,9 +8,11 @@
 	br = branch -vv --color
 	cm = commit
 	fx = commit --amend --no-edit
+	rb = rebase -i
 	uc = reset HEAD~
 	st = status
-	lg = log --pretty=format:\"%C(yellow)%h%Cred%d %Creset%s%Cblue [%cn]\" --decorate --numstat
+	sh = show --pretty
+	lg = log --pretty --decorate --stat --oneline
 
 	chmod = "!git update-index --chmod=$1 \"$GIT_PREFIX$2\" #"
 	locate = "!git grep --full-name -l \"\" -- \"*$1*\" #"
