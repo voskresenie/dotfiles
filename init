@@ -152,7 +152,7 @@ config () {
   # how to find symlinks referencing source:
   # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
   # TODO: find any files that might take precedence
-  syms=(
+  cfgs=(
         #dwb/
         #dwb/searchengines
         #dwb/settings
@@ -174,6 +174,7 @@ config () {
         "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
         "fehbg:$XDG_CONFIG_HOME/fehbg"
         #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+        "git/config:$XDG_CONFIG_HOME/git/config"
         "htoprc:$XDG_CONFIG_HOME/htop/htoprc"
         "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
         "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
@@ -203,10 +204,10 @@ config () {
   [ "$force" = true ] &&
     print ":: Overwriting existing files with -f"
 
-  for (( i=1 ; i<=${#syms[@]} ; i++ )); do
-    src="$(realpath -ms "$srcdir/${syms[$i]%%:*}")"
-    dst="$(realpath -ms "$dstdir/${syms[$i]#*:}")"
-    printf "(%d/%d) %s -> %s\n" "$i" "${#syms[@]}" "$src" "$dst"
+  for (( i=1 ; i<=${#cfgs[@]} ; i++ )); do
+    src="$(realpath -ms "$srcdir/${cfgs[$i]%%:*}")"
+    dst="$(realpath -ms "$dstdir/${cfgs[$i]#*:}")"
+    printf "(%d/%d) %s -> %s\n" "$i" "${#cfgs[@]}" "$src" "$dst"
 
     # find last element of path that already exists
     d="$dst"
