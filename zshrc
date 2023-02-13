@@ -38,8 +38,6 @@ alias suvim='sudo -E nvim'
 alias vim='nvim'
 
 # code
-alias git-locate='git ls-files | grep'
-alias git-chmod='git update-index --chmod='
 export GOPATH=$HOME
 
 # system
