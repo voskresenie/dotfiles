@@ -1,6 +1,7 @@
-export EDITOR=nvim
-export GOPATH=$HOME
-export PATH=$GOPATH/bin:$HOME/bin:$PATH
-export PS1='@%m %1~ $ '
-export STEAM_RUNTIME=0
-export PAGER=less
+# $HOME/.zprofile
+#
+# This file contains per-user environment vars
+#
+emulate sh
+[ -f $HOME/.profile ] && . $HOME/.profile
+emulate zsh

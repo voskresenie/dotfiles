@@ -1,4 +1,6 @@
-# $HOME/.zshrc
+#!/usr/bin/env zsh
+#
+# $ZDOTDIR/.zshrc
 #
 # This file contains configuration for zsh
 #
@@ -83,7 +85,9 @@ alias valhalla='ssh valhalla'
 # shell
 setopt auto_cd
 alias .='ls'
-export PS1='@%m %1~ $ '
+
+source "$ZDOTDIR"/colorsenv
+export PS1="${DARKCYAN}@%m %1~ $ ${RESET}"
 export PATH=$GOPATH/bin:$HOME/bin:$PATH
 source /usr/share/doc/pkgfile/command-not-found.zsh
 

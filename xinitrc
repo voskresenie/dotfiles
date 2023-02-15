@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $HOME/.xinitrc
+# ~/.xinitrc
 #
 # This file contains configuration for xorg-xinit and allows customization of
 # xorg server at startup

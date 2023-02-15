@@ -1,41 +1,44 @@
-! special - dark
+!
+! $XDG_CONFIG_HOME/X11/colorsdark
+!
+! special
 *.foreground:   #c5c8c6
 *.background:   #1d1f21
 *.cursorColor:  #c5c8c6
 
 ! black
-*.color0: #282a2e
+*.color0:       #282a2e
 ! dark red
-*color1:  #974d39
+*.color1:       #974d39
 ! dark green
-*color2:  #677c5e
+*.color2:       #677c5e
 ! dark yellow
-*color3:  #dbcb91
+*.color3:       #dbcb91
 ! dark blue
-*color4:  #4868a0
+*.color4:       #4868a0
 ! dark magenta
-*color5:  #8f99ac
+*.color5:       #8f99ac
 ! dark cyan
-*color6:  #6c7c7f
+*.color6:       #6c7c7f
 ! light grey
-*color7:  #ccd7e9
+*.color7:       #ccd7e9
 
 ! dark grey
-*.color8: #373b41
+*.color8:       #373b41
 ! red
-*color9:  #b25b43
+*.color9:       #b25b43
 ! green
-*color10: #9db683
+*.color10:      #9db683
 ! yellow
-*color11: #ebdb82
+*.color11:      #ebdb82
 ! blue
-*color12: #89aed1
+*.color12:      #89aed1
 ! magenta
-*color13: #bdcae1
+*.color13:      #bdcae1
 ! cyan
-*color14: #8a9b98
+*.color14:      #8a9b98
 ! white
-*color15: #fdf9f6
+*.color15:      #fdf9f6
 
 !! red
 !*.color1:       #a54242
@@ -64,4 +67,3 @@
 !! white
 !*.color7:       #707880
 !*.color15:      #c5c8c6
-

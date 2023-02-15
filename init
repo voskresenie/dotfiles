@@ -160,6 +160,10 @@ config () {
   # how to find symlinks referencing source:
   # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
   # TODO: find any files that might take precedence
+  #
+  # TODO: add support for destination being a directory rather than filename
+  # TODO: add support for * operator
+  # TODO: add detection for whether existing destination is NOT a symlink
   cfgs=(
         #dwb/
         #dwb/searchengines
@@ -174,11 +178,10 @@ config () {
         #firefox/chrome/userChrome.css
         #firefox/chrome/userContent.css
 
-        # TODO: add support for * operator
-        #"global/environment:/etc/environment"
         "global/pacman.conf:/etc/pacman.conf"
         "global/profile:/etc/profile.d/user.sh"
 
+        "colors/env:$ZDOTDIR/colorsenv"
         "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
         "fehbg:$XDG_CONFIG_HOME/fehbg"
         #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
@@ -187,11 +190,10 @@ config () {
         "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
         "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
         "mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
-        # TODO: replace with ncmpcpp/*
         "ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
         "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
         "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
-        ".pam_environment:$HOME/.pam_environment"                      # TODO: make xdg-compliant
+        "pam_environment:$HOME/.pam_environment"                       # TODO: make xdg-compliant
         "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
         "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
         "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
@@ -199,13 +201,13 @@ config () {
         "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
         "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
         "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
-        ".xbindkeysrc:$HOME/.xbindkeysrc"                              # TODO: make xdg-compliant
+        "xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
         "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
-        "xres/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
-        "xres/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
-        "xresources:$XDG_CONFIG_HOME/X11/xresources"
+        "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+        "X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+        "X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
         "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
-        "zshrc:$HOME/.zshrc"                                           # TODO: make xdg-compliant
+        "zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
 
         "bin/xstat:$HOME/bin/xstat"
       )

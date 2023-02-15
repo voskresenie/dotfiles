@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 #
-# $HOME/bin
+# ~/bin
 #
 # This script generates a statusbar for Xorg using xsetroot. It includes several
 # components separated by a delimiter and refreshes at a given rate, if

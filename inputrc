@@ -1,4 +1,5 @@
-# $HOME/.inputrc
+#
+# ~/.inputrc
 #
 # This file contains configuration for GNU Readline. Specifically, it allows
 # for vi shortcuts in ncmpcpp and other ncurses text edit fields
