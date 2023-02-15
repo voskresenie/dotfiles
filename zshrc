@@ -49,6 +49,7 @@ alias red='redshift -l 44.915194:-93.1044794'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 
 # packages
+alias pacsearch='pacman -Ss'
 alias pacinfo='pacman -Q --info'
 alias pacrm='sudo pacman -Rs'
 alias makepkg-rebuild='makepkg -fi'
