@@ -195,7 +195,8 @@ config () {
         "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
         "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
         "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
-        "vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+        "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+        "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
         "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
         ".xbindkeysrc:$HOME/.xbindkeysrc"                              # TODO: make xdg-compliant
         "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant

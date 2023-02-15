@@ -33,7 +33,6 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 set laststatus=2
-let g:airline_theme='solarized'
 
 Plugin 'kien/ctrlp.vim'
 let g:ctrlp_map = '<c-p>'
@@ -58,10 +57,10 @@ set backup
 " system compatibility
 set mouse=a             " enable full mouse support
 set clipboard^=unnamed  " use system clipboard
-set t_Co=16
 
 " theme
-set background=dark
+colorscheme voskarch
+let g:airline_theme='solarized'
 
 " shortcuts
 let mapleader = "\<Space>"
