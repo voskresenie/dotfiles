@@ -197,6 +197,7 @@ config () {
         "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
         "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
         "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
+        "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
         "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
         ".xbindkeysrc:$HOME/.xbindkeysrc"                              # TODO: make xdg-compliant
         "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant

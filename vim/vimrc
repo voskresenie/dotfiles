@@ -27,11 +27,9 @@ filetype off
 
 set rtp+=$XDG_DATA_HOME/vim/bundle/Vundle.vim
 call vundle#begin($XDG_DATA_HOME.'/vim/bundle')
-
 Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
 set laststatus=2
 
 Plugin 'kien/ctrlp.vim'
@@ -60,7 +58,15 @@ set clipboard^=unnamed  " use system clipboard
 
 " theme
 colorscheme voskarch
-let g:airline_theme='solarized'
+let g:airline_theme='voskarch'
+let g:airline_powerline_fonts = 1
+"let g:airline_powerline_ascii = 1
+"let g:airline_voskarch_bg='dark'
+let g:airline_voskarch_normal_green=1
+let g:airline_voskarch_dark_inactive_background=1
+let g:airline_voskarch_dark_text=0
+let g:airline_voskarch_dark_inactive_border=1
+let g:airline_voskarch_enable_command_color=1
 
 " shortcuts
 let mapleader = "\<Space>"

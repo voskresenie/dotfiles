@@ -1,5 +1,6 @@
 URxvt.scrollBar: false
-URxvt.font: xft:Inconsolata LGC:style=Bold:pixelsize=12.5:antialias=true:hinting=true
+URxvt.font: xft:Inconsolata LGC:style=Bold:pixelsize=12.5:antialias=true:hinting=true,\
+            xft:Powerline Symbols:pixelsize=12.5:antialias=true:hinting=false
 URxvt.boldFont:
 URxvt.letterSpace: -2
 URxvt.internalBorder: 10
