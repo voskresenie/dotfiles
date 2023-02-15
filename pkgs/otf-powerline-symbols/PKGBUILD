@@ -1,0 +1,27 @@
+_pkgname=otf-powerline-symbols
+pkgname=${_pkgname}-vosk
+pkgver=0.0.1
+pkgrel=1
+pkgdesc='Fallback font for Powerline symbols, modified to work with personal urxvt config'
+url='https://github.com/powerline/powerline'
+license=('MIT')
+arch=('any')
+provides=('otf-powerline-symbols')
+conflicts=('otf-powerline-symbols-git')
+
+source=('PowerlineSymbols.otf'
+		'10-powerline-symbols.conf'
+		'LICENSE')
+install=powerline-symbols.install
+sha256sums=('77b37363d45e6e5b0f6e4dc9e11ec13bc40faa9e17b72cc7302ff370951c1128'
+            '079f6d44d34feebdc2ae7aee791090d6bfb1fec8a0359439368aa2efc5a0c0f7'
+            '46d5355e4734468135d8e4a30d0916292cc4df2b3ec30aa68c866f82497933be')
+
+package() {
+	install -dm755 "${pkgdir}/etc/fonts/conf.d"
+	install -Dm644 "${srcdir}/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/powerline/PowerlineSymbols.otf"
+	install -Dm644 "${srcdir}/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
+	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
+
+	install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

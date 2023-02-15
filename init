@@ -67,6 +67,14 @@ install () {
     git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
     vim +BundleInstall +q +q
   fi
+  # powerline font
+  # TODO: add installation of custom font pkg (pkgs/otf-powerline-symbols)
+  # for reference: how this was originally done, in case package doesn't work
+  # wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
+  # wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
+  # mv PowerlineSymbols.otf ~/.local/share/fonts/
+  # fc-cache -vf ~/.local/share/fonts/
+  # mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/
 }
 
 # abs installs new packages and upgrades existing packages
