@@ -204,6 +204,45 @@ restore () {
   sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
 }
 
+# verbose print
+#
+# usage: vprint VERBOSE MESSAGE...
+#
+# Usage same as print. VERBOSE param, if taken from a variable, should be quoted
+# if there is a chance it will be null. Evaluates to true even if VERBOSE is
+# false. This makes it simpler to chain together with other commands, eg
+#   command && vprint $v $success_msg || print $failure_msg
+# where the goal is to print a success message only if verbose logging is
+# enabled, but print a failure message whether verbose logging is enabled or
+# not. If vprint evaluated to false when verbose is false, this functionality
+# wouldn't be possible in shorthand except through something gross like
+#  command && { vprint $v $success_msg || true } || print $failure_msg
+# which is the exact sort of use case vprint exists to avoid.
+#
+vprint () {
+  local __verbose="$1"
+  local __msg=${@:2}
+  [ "$__verbose" = true ] && [ -n "$__msg" ] && print $__msg || true
+}
+
+# verbose eval
+#
+# usage: veval VERBOSE? MESSAGE CMD...
+#
+# Usage same as eval (ie command may require escaping). VERBOSE param, if taken
+# from a variable, should be quoted if there is a chance it will be null.
+#
+veval () {
+  local __verbose="$1"
+  local __msg="$2"
+  local __cmd="${@:3}"
+  if [ "$__verbose" = true ]; then
+    [ -n "$__msg" ] && print "$__msg"
+    [ -n "$__cmd" ] && print "$__cmd"
+  fi
+  eval $__cmd
+}
+
 request_root () {
   local __rootvar=${1:?"The root var must be specified."}
   eval local __root=$"$__rootvar"
@@ -229,16 +268,15 @@ config () {
   #   all `getopts` share a single global OPTIND
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
   local OPTIND opt
-  local srcdir dstdir prmpt list clean force copy
-  while getopts ":i:o:plcfx" opt; do
+  local prmpt list clean copy force verbose=false
+  while getopts ":plcxfv" opt; do
     case $opt in
-      i) srcdir="$(realpath "$OPTARG")" ;;
-      o) dstdir="$OPTARG" ;;
       p) prmpt=true ;;
       l) list=true ;;
       c) clean=true ;;
-      f) force=true ;;
       x) copy=true ;;
+      f) force=true ;;
+      v) verbose=true ;;
       \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
     esac
   done
@@ -255,26 +293,35 @@ config () {
     print ":: Removing files managed by $pkgname $0:"
     if [ -f "$cfg_state" ]; then
       local tmp="$(mktemp)"
-      #local existing_cfgs=( )
-      #while read -r cfg; do
-      #  existing_cfgs+=("$cfg")
-      #done < "$cfg_state"
       local existing_cfgs=("${(@f)$(< "$cfg_state")}")
 
       for (( i=1 ; i<=${#existing_cfgs[@]} ; i++ )); do
         cfg="$existing_cfgs[$i]"
         printf "(%d/%d) %s\n" "$i" "${#existing_cfgs[@]}" "$cfg"
-        cp -u --backup=numbered --parents "$cfg" "$cfg_backup_dir"
+
+        veval $verbose ":: Backing up file before removing" \
+          cp -u --backup=numbered --parents \"$cfg\" \"$cfg_backup_dir\"
+
+        sudo= # reset in case set by previous iterations
         if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
           request_root root ":: Missing write access for file, continue as root?"
-          [ "$root" = true ] && sudo="sudo -E" ||
-            {print ":: Root access required, skipping..." && print "$cfg" >> "$tmp" && continue }
+          [ "$root" = true ] && sudo="sudo -E " || {
+            print ":: Root access required, skipping..."
+            veval $verbose ":: Writing filename to temporary file to be preserved in config state file" \
+              print \"$cfg\" ">>" \"$tmp\"
+            continue
+          }
         fi
-        eval "$sudo rm \"$cfg\"" &&
-          print ":: Removed config" ||
-          { print ":: Could not remove config" && print "$cfg" >> "$tmp" }
+        veval $verbose ":: Removing config$([ -n "$sudo" ] && print " as root")" \
+          $sudo rm \"$cfg\" &&
+          vprint $verbose ":: Removed config" || {
+            print ":: Could not remove config"
+            veval $verbose ":: Writing filename to temporary file to be preserved in config state file" \
+              print \"$cfg\" ">>" \"$tmp\"
+          }
       done
-      mv "$tmp" "$cfg_state"
+      veval $verbose ":: Replacing config state file with temporary file" \
+        mv \"$tmp\" \"$cfg_state\"
     fi
     exit
   fi
@@ -285,38 +332,29 @@ config () {
   #
   # TODO: add detection for whether existing destination is NOT a symlink
 
-  [ "$copy" = true ] && print ":: Copying files..." || print ":: Linking files..."
-  [ "$force" = true ] &&
-    print ":: Overwriting existing files with -f"
+  [ "$copy" = true ] && vprint $verbose ":: Copying files..." || vprint $verbose ":: Linking files..."
+  [ "$force" = true ] && vprint $verbose ":: Overwriting existing files with -f"
 
   local src dst d filetype overwrite
   for (( i=1 ; i<=${#cfgs[@]} ; i++ )); do
-    src="$(realpath -ms "$srcdir/${cfgs[$i]%%:*}")"
-    dst="$(realpath -ms "$dstdir/${cfgs[$i]#*:}")"
+    src="$(realpath -ms "$repo_dir/${cfgs[$i]%%:*}")"
+    dst="$(realpath -ms "${cfgs[$i]#*:}")"
     printf "(%d/%d) %s -> %s\n" "$i" "${#cfgs[@]}" "$src" "$dst"
-
-    # find last element of path that already exists
-    d="$dst"
-    while [ ! -e "$d" ] || [ -h "$d" ]; do
-      d="$(dirname "$d")"
-    done
-
-    # TODO: copy owner from file if already present, or directory if not
-    # maybe not needed because files are just me / root
-    #user=$(stat -c '%U' "$d")
-    #group=$(stat -c '%G' "$d")
 
     [ -h "$dst" ] && filetype="symlink" ||
       { [ -d "$dst" ] && filetype="directory" } ||
       { [ -f "$dst" ] && filetype="file" }
 
-    cmp --silent "$src" "$dst" &&
-      { { [ -h "$dst" ] && [ "$(readlink -f "$dst")" = "$src" ] &&
-          printf ":: Destination is symlink to source, " } ||
-        { [ ! -h "$dst" ] &&
-          printf ":: Destination and source are identical, " } } &&
-      { [ "$force" = true ] && print "overwriting anyway with -f" ||
-        { print "skipping" && print "$dst" >> "$cfg_state" && continue } }
+    veval $verbose ":: Comparing source to destination" \
+      cmp --silent \"$src\" \"$dst\" &&
+      { { [ -h "$dst" ] && [ ! "$copy" = true ] && [ "$(readlink -f "$dst")" = "$src" ] &&
+          msg=":: Destination is symlink to source" } ||
+        { [ ! -h "$dst" ] && [ "$copy" = true ] &&
+          msg=":: Destination and source are identical" } } &&
+      { [ "$force" = true ] && vprint $verbose "$msg, overwriting anyway with -f" ||
+        { vprint $verbose "$msg, skipping" &&
+          veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"cfg_state\" &&
+          continue } }
 
     [ "$prmpt" = true ] &&
       while true; do
@@ -326,7 +364,7 @@ config () {
           [Yy]|Yes|yes )
             break ;;
           [Nn]|No|no|"" )
-            print ":: Skipping..."
+            vprint $verbose ":: Skipping..."
             continue 2 ;;
           * ) ;;
         esac
@@ -342,7 +380,7 @@ config () {
             [Yy]|Yes|yes )
               break ;;
             [Nn]|No|no|"" )
-              print ":: Skipping..."
+              vprint $verbose ":: Skipping..."
               continue 2 ;;
             * ) ;;
           esac
@@ -350,42 +388,56 @@ config () {
 
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
-      cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered \
-          --parents "$dst" "$cfg_backup_dir" &&
-        print ":: Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
-        while true; do
-          printf ":: Failed to back up $filetype, "
-          [ "$force" = true ] && print "overwriting anyway with -f" && break ||
-            printf "overwrite anyway? (y/N) "
-          read yn
-          case $yn in
-            [Yy]|Yes|yes )
-              break ;;
-            [Nn]|No|no|"" )
-              print ":: Skipping..."
-              continue 2 ;;
-            * ) ;;
-          esac
-        done
+      cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
+      veval $verbose ":: Backing up existing $filetype before overwriting" $cmd &&
+        vprint $verbose ":: Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
+        { [ "$force" = true ] &&
+            vprint $verbose ":: Failed to back up $filetype, overwriting anyway with -f" ||
+            while true; do
+              printf ":: Failed to back up $filetype, overwrite anyway? (y/N) "
+              read yn
+              case $yn in
+                [Yy]|Yes|yes )
+                  break ;;
+                [Nn]|No|no|"" )
+                  print ":: Skipping..."
+                  continue 2 ;;
+                * ) ;;
+              esac
+            done }
       overwrite=true
     fi
 
+    # find last element of path that already exists
+    d="$dst"
+    while [ ! -e "$d" ] || [ -h "$d" ]; do
+      d="$(dirname "$d")"
+    done
+
+    # TODO: copy owner from file if already present, or directory if not
+    # maybe not needed because files are just me / root
+    #user=$(stat -c '%U' "$d")
+    #group=$(stat -c '%G' "$d")
+
+    sudo= # reset in case set by previous iterations
     if [ ! -w "$d" ]; then
       request_root root ":: Missing write access for destination $d, continue as root?"
       [ "$root" = true ] && sudo="sudo -E" ||
-          {print ":: Root access required, skipping..." && continue }
+          { print ":: Root access required, skipping..." && continue }
     fi
 
-    eval "$sudo mkdir -p \"$(dirname "$dst")\""
-    eval "$sudo cp \"$src\" \"$dst\" \
+    veval $verbose ":: Making missing directories in path" \
+      $sudo mkdir -p \"$(dirname "$dst")\"
+    veval $verbose "" \
+      "${sudo}cp \"$src\" \"$dst\" \
         $( [ -h "$dst" ] && echo "--remove-destination") \
         $( [ "$overwrite" = true ] && echo "-f") \
         $( [ "$copy" = true ] || echo "-s") \
         2>/dev/null" &&
-      { { print "$dst" >> "$cfg_state" } &&
+      { veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"cfg_state\" &&
         [ "$copy" = true ] &&
-        print ":: Copied file" ||
-        print ":: Created symbolic link" } ||
+        vprint $verbose ":: Copied file" ||
+        vprint $verbose ":: Created symbolic link" } ||
       { [ "$copy" = true ] &&
         print ":: Could not copy file" ||
         print ":: Could not create symbolic link" }
@@ -418,18 +470,18 @@ fstab() {
 # echo "${args[@]}"
 # echo "${opts[@]}"
 
-readonly cmd=${1:?"The command must be specified."}
+readonly initcmd=${1:?"The command must be specified."}
 prereq
-case $cmd in
+case $initcmd in
   init) init "${@:2}" ;;
   install) install "${@:2}" ;;
   abs) abs "${@:2}" ;;
   backup) backup "${@:2}" ;;
   update) update "${@:2}" ;;
   restore) restore "${@:2}" ;;
-  config) config -i "$repo_dir" -o / "${@:2}" ;;
+  config) config "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
-  *) echo "Invalid command $cmd" >&2
+  *) echo "Invalid command $initcmd" >&2
     exit 1
 esac
