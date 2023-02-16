@@ -110,6 +110,82 @@ set shiftwidth=4
 set expandtab
 set smarttab
 
+augroup vimrc
+  " Remove all vimrc autocommands
+  autocmd!
+  au BufWinEnter * :MatchIndentationStyle
+  au BufWritePre * :UpdateIndentationStyle
+augroup END
+
+" scans file for most common -- spaces or tabs
+function! MatchIndentationStyle(...)
+  "  ^.*(?<!\.go|\.html|\.css)$
+  if &ft =~ 'c\|go\|scheme\|cpp\|python\|php\|html\|javascript\|zsh\|vim\|yaml' && a:0 == ""
+    return
+  endif
+
+  redir => cnt
+    silent exe('%s/[    ]\{4\}//gen')
+  redir END
+  let l:space_lines = 0
+  if len(cnt) > 0
+    let l:space_lines_lst = matchlist(cnt, '\(\d\+\) match\(es\|\) on \(\d\+\) line\(s\|\)')
+    if len(l:space_lines_lst) > 1
+      let l:space_lines = l:space_lines_lst[3]
+    endif
+  endif
+
+  redir => cnt
+    silent exe('%s/\t//gen')
+  redir END
+  let l:tab_lines = 0
+  if len(cnt) > 0
+    let l:tab_lines_lst = matchlist(cnt, '\(\d\+\) match\(es\|\) on \(\d\+\) line\(s\|\)')
+    if len(l:tab_lines_lst) > 1
+      let l:tab_lines = l:tab_lines_lst[3]
+    endif
+  endif
+
+  if str2nr(l:tab_lines) > str2nr(l:space_lines)
+    echom "Using tabs for consistency with rest of file"
+    setlocal noexpandtab
+  else
+    echom "Using spaces for consistency with rest of file"
+    setlocal expandtab
+  endif
+endfunc
+
+" scans file for most common -- spaces or tabs
+" TODO: maybe find indentation size for non-tab
+function! UpdateIndentationStyle()
+  redir => l:tabs
+    silent setlocal noexpandtab?
+  redir END
+  if l:tabs =~ 'noexpandtab'
+    "echom "Updating indentation to tabs for consistency with rest of file"
+    "call UseTabs()
+  else
+    "echom "Updating indentation to spaces for consistency with rest of file"
+    "call UseSpaces()
+  endif
+endfunc
+
+function! UseTabs()
+  redir => l:shiftwidth
+    silent setlocal shiftwidth?
+  redir END
+  echo l:shiftwidth
+  silent %! sed -e 's/[ ]\{' . '4' . '\}/\t/g'
+endfunc
+
+function! UseSpaces()
+  redir => l:shiftwidth
+    silent setlocal shiftwidth?
+  redir END
+  echo l:shiftwidth
+  silent %! sed -e 's/\t/    /g'
+endfunc
+
 " filetype specific
 autocmd FileType c setlocal expandtab shiftwidth=4 softtabstop=4
 autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=4
@@ -123,17 +199,29 @@ autocmd FileType html setlocal expandtab
 autocmd FileType css setlocal expandtab
 autocmd FileType javascript setlocal expandtab
 
+autocmd FileType zsh setlocal expandtab shiftwidth=2 tabstop=2 softtabstop=2
+autocmd FileType vim setlocal expandtab shiftwidth=2 tabstop=2 softtabstop=2
 autocmd FileType yaml setlocal expandtab
 
 " Set up a way to toggle between relative and absolute line numbering
 function! NumberToggle()
-    if (&relativenumber)
-        set norelativenumber
-    else
-        set relativenumber
-    endif
+  if (&relativenumber)
+    set norelativenumber
+  else
+    set relativenumber
+  endif
 endfunc
-
 nnoremap <leader>n :call NumberToggle()<cr>
+
+command! MatchIndentationStyle call MatchIndentationStyle()
+command! UpdateIndentationStyle call UpdateIndentationStyle()
+command! Tabs call UseTabs()
+command! Spaces call UseSpaces()
+
+nnoremap <leader>w :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar><CR>
+
+nnoremap <leader>e :e<cr>
+nnoremap <leader>t :call UpdatetIndentationStyle()<cr>
+" panes
 nnoremap <C-w>" :split<cr>
 nnoremap <C-w>% :vsplit<cr>
