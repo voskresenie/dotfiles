@@ -1,0 +1,26 @@
+#
+# colors/dark
+#
+# Can be imported by scripts to keep colors consistent across configs when
+# packages ignore X11 colors
+#
+ foreground='#c5c8c6' # rgb(197,200,198)
+ background='#1d1f21' # rgb( 29. 31. 33)
+cursorColor='#c5c8c6' # rgb(197,200,198)
+  colors16=('#282a2e' # rgb( 40, 42, 46) # 00 black
+            '#974d39' # rgb(151, 77, 57) # 01 dark red
+            '#677c5e' # rgb(103,124, 94) # 02 dark green
+            '#dbcb91' # rgb(219,203,145) # 03 dark yellow -- this color sucks, it looks lighter than regular yellow for some reason
+            '#4868a0' # rgb( 72,104,160) # 04 dark blue
+            '#8f99ac' # rgb(143,153,172) # 05 dark magenta
+            '#6c7c7f' # rgb(108,124,127) # 06 dark cyan
+            '#ccd7e9' # rgb(204,215,233) # 07 light grey
+            '#373b41' # rgb( 55, 59, 65) # 08 dark grey
+            '#b25b43' # rgb(178, 91, 67) # 09 red
+            '#9db683' # rgb(157,182,131) # 10 green
+            '#ebdb82' # rgb(235,219,130) # 11 yellow
+            '#89aed1' # rgb(137,174,209) # 12 blue
+            '#bdcae1' # rgb(189,202,225) # 13 magenta
+            '#8a9b98' # rgb(138,155,152) # 14 cyan
+            '#fdf9f6' # rgb(253,249,246) # 15 white
+            )

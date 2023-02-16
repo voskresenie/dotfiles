@@ -87,7 +87,7 @@ setopt auto_cd
 alias .='ls'
 
 source "$ZDOTDIR"/colorsenv
-export PS1="${DARKCYAN}@%m %1~ $ ${RESET}"
+export PS1="@%m %1~ $ "
 export PATH=$GOPATH/bin:$HOME/bin:$PATH
 source /usr/share/doc/pkgfile/command-not-found.zsh
 
