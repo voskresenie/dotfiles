@@ -9,17 +9,79 @@
 # * TODO - set up hosts file
 # * TODO - set up NFS connection in fstab file
 #
-REPO_DIR="$(realpath "$(dirname "$0")")"
-source "$REPO_DIR"/global/profile
-source "$REPO_DIR"/profile
+# TODO: this is apparently bad for some reason, fix it
+# http://mywiki.wooledge.org/BashFAQ/028
+repo_dir="$(realpath "$(dirname "$0")")"
+source "$repo_dir"/global/profile
+source "$repo_dir"/profile
 
-PKGNAME=voskarch
-BACKUP_DIR="$XDG_STATE_HOME/$PKGNAME/backup"
+# these should already be set by one of the profile files, but might be worth
+# keeping around anyway just in case
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-~/.config}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-~/.local/state}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-~/.local/share}"
+
+pkgname=voskarch
+state_dir="$XDG_STATE_HOME/$pkgname"
+data_dir="$XDG_DATA_HOME/$pkgname"
+
 # directory for backing up config files before overwriting
-CFG_BACKUP_DIR="$BACKUP_DIR/cfg"
+cfg_backup_dir="$state_dir/cfg/backup"
+# file for keeping track of configs managed by script
+cfg_state="$state_dir/cfg/managed"
+# list of cfgs `src:dst` (potentially) managed by script
+cfgs=(
+      # TODO: add support for destination being a directory rather than filename
+      # TODO: add support for * operator
+
+      #dwb/
+      #dwb/searchengines
+      #dwb/settings
+      #dwm/
+      #dwm/dwm-diff.sh
+      #dwm/dwm-grid-6.1.diff
+      #dwm/dwm-svarog-6.1.diff
+      #dwm/PKGBUILD
+      #firefox/
+      #firefox/chrome/
+      #firefox/chrome/userChrome.css
+      #firefox/chrome/userContent.css
+
+      "global/pacman.conf:/etc/pacman.conf"
+      "global/profile:/etc/profile.d/user.sh"
+
+      "colors/env:$ZDOTDIR/colorsenv"
+      "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
+      "fehbg:$XDG_CONFIG_HOME/fehbg"
+      #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+      "git/config:$XDG_CONFIG_HOME/git/config"
+      "htoprc:$XDG_CONFIG_HOME/htop/htoprc"
+      "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
+      "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
+      "mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
+      "ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
+      "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
+      "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
+      "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
+      "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
+      "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
+      "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+      "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
+      "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
+      "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
+      "xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
+      "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
+      "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+      "X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+      "X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
+      "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
+      "zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
+
+      "bin/xstat:$HOME/bin/xstat"
+    )
 
 prereq () {
-  mkdir -p "$BACKUP_DIR" "$CFG_BACKUP_DIR"
+  mkdir -p "$cfg_backup_dir"
 
   source "$XDG_CONFIG_HOME"/user-dirs.dirs
   # TODO: this might be doable with xdg-user-dirs-update, unclear
@@ -34,18 +96,18 @@ prereq () {
 }
 
 init () {
-  if [ "$REPO_DIR" != "$(realpath -m "$XDG_DATA_HOME/$PKGNAME")" ]; then
+  if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
     while true; do
-      printf ":: repo located at $REPO_DIR; move to $XDG_DATA_HOME/$PKGNAME? (y/N) "
+      printf ":: repo located at $repo_dir; move to $data_dir? (y/N) "
       read yn
       case $yn in
         [Yy]|Yes|yes )
           mkdir -p "$XDG_DATA_HOME"
-          cp -r "$REPO_DIR" "$XDG_DATA_HOME/$PKGNAME"
-          cd "$XDG_DATA_HOME/$PKGNAME"
-          rm -rf "$REPO_DIR"
-          REPO_DIR="$XDG_DATA_HOME/$PKGNAME"
-          print ":: new repo location: $REPO_DIR"
+          cp -r "$repo_dir" "$data_dir"
+          cd "$data_dir"
+          rm -rf "$repo_dir"
+          repo_dir="$data_dir"
+          print ":: new repo location: $repo_dir"
           break ;;
         [Nn]|No|no|"" ) break ;;
         * ) ;;
@@ -111,7 +173,7 @@ abs () {
 # runs before update to save current state
 backup () {
   # record last update date
-  grep upgrade /var/log/pacman.log | tail -1 | cut -c 2-11 > $XDG_STATE_HOME/$PKGNAME/backup
+  grep upgrade /var/log/pacman.log | tail -1 | cut -c 2-11 > "$state_dir"/last_update
 }
 
 update () {
@@ -132,7 +194,7 @@ update () {
 restore () {
   # restore to previous date in case of bad update
   # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
-  date="$(cat "$XDG_STATE_HOME/$PKGNAME/backup")"
+  date="$(cat "$state_dir"/last_update)"
 
   sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
   mirrorlistcmd="echo \"Server=https://archive.archlinux.org/repos/$(print -r -- ${date//-/\/})/\\\$repo/os/\\\$arch\" > /etc/pacman.d/mirrorlist"
@@ -142,80 +204,92 @@ restore () {
   sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
 }
 
+request_root () {
+  local __rootvar=${1:?"The root var must be specified."}
+  eval local __root=$"$__rootvar"
+  local msg=$2
+  while [ -z "$__root" ]; do
+    printf "$msg (Y/n) "
+    read yn
+    case $yn in
+      [Yy]|Yes|yes|"" )
+        __root=true
+        break ;;
+      [Nn]|No|no )
+        __root=false
+        break ;;
+      * ) ;;
+    esac
+  done
+  eval $__rootvar="'$__root'"
+}
+
 config () {
   # Always include `local OPTIND` in any function that uses `getopts` otherwise
   #   all `getopts` share a single global OPTIND
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
   local OPTIND opt
-  while getopts ":i:o:fc" opt; do
+  local srcdir dstdir prmpt list clean force copy
+  while getopts ":i:o:plcfx" opt; do
     case $opt in
       i) srcdir="$(realpath "$OPTARG")" ;;
       o) dstdir="$OPTARG" ;;
+      p) prmpt=true ;;
+      l) list=true ;;
+      c) clean=true ;;
       f) force=true ;;
-      c) copy=true ;;
+      x) copy=true ;;
       \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
     esac
   done
+
+  local root sudo
+
+  if [ "$list" = true ]; then
+    print ":: Files managed by $pkgname $0:"
+    [ -f "$cfg_state" ] && cat "$cfg_state"
+    return
+  fi
+
+  if [ "$clean" = true ]; then
+    print ":: Removing files managed by $pkgname $0:"
+    if [ -f "$cfg_state" ]; then
+      local tmp="$(mktemp)"
+      #local existing_cfgs=( )
+      #while read -r cfg; do
+      #  existing_cfgs+=("$cfg")
+      #done < "$cfg_state"
+      local existing_cfgs=("${(@f)$(< "$cfg_state")}")
+
+      for (( i=1 ; i<=${#existing_cfgs[@]} ; i++ )); do
+        cfg="$existing_cfgs[$i]"
+        printf "(%d/%d) %s\n" "$i" "${#existing_cfgs[@]}" "$cfg"
+        cp -u --backup=numbered --parents "$cfg" "$cfg_backup_dir"
+        if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
+          request_root root ":: Missing write access for file, continue as root?"
+          [ "$root" = true ] && sudo="sudo -E" ||
+            {print ":: Root access required, skipping..." && print "$cfg" >> "$tmp" && continue }
+        fi
+        eval "$sudo rm \"$cfg\"" &&
+          print ":: Removed config" ||
+          { print ":: Could not remove config" && print "$cfg" >> "$tmp" }
+      done
+      mv "$tmp" "$cfg_state"
+    fi
+    exit
+  fi
 
   # how to find symlinks referencing source:
   # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
   # TODO: find any files that might take precedence
   #
-  # TODO: add support for destination being a directory rather than filename
-  # TODO: add support for * operator
   # TODO: add detection for whether existing destination is NOT a symlink
-  cfgs=(
-        #dwb/
-        #dwb/searchengines
-        #dwb/settings
-        #dwm/
-        #dwm/dwm-diff.sh
-        #dwm/dwm-grid-6.1.diff
-        #dwm/dwm-svarog-6.1.diff
-        #dwm/PKGBUILD
-        #firefox/
-        #firefox/chrome/
-        #firefox/chrome/userChrome.css
-        #firefox/chrome/userContent.css
-
-        "global/pacman.conf:/etc/pacman.conf"
-        "global/profile:/etc/profile.d/user.sh"
-
-        "colors/env:$ZDOTDIR/colorsenv"
-        "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
-        "fehbg:$XDG_CONFIG_HOME/fehbg"
-        #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
-        "git/config:$XDG_CONFIG_HOME/git/config"
-        "htoprc:$XDG_CONFIG_HOME/htop/htoprc"
-        "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
-        "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
-        "mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
-        "ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
-        "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
-        "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
-        "pam_environment:$HOME/.pam_environment"                       # TODO: make xdg-compliant
-        "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
-        "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
-        "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
-        "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
-        "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
-        "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
-        "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
-        "xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
-        "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
-        "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
-        "X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
-        "X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
-        "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
-        "zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
-
-        "bin/xstat:$HOME/bin/xstat"
-      )
 
   [ "$copy" = true ] && print ":: Copying files..." || print ":: Linking files..."
   [ "$force" = true ] &&
     print ":: Overwriting existing files with -f"
 
+  local src dst d filetype overwrite
   for (( i=1 ; i<=${#cfgs[@]} ; i++ )); do
     src="$(realpath -ms "$srcdir/${cfgs[$i]%%:*}")"
     dst="$(realpath -ms "$dstdir/${cfgs[$i]#*:}")"
@@ -242,7 +316,21 @@ config () {
         { [ ! -h "$dst" ] &&
           printf ":: Destination and source are identical, " } } &&
       { [ "$force" = true ] && print "overwriting anyway with -f" ||
-        { print "skipping" && continue } }
+        { print "skipping" && print "$dst" >> "$cfg_state" && continue } }
+
+    [ "$prmpt" = true ] &&
+      while true; do
+        printf ":: %s file? (y/N) " $([ "$copy" = true ] && print "Copy" || print "Link")
+        read yn
+        case $yn in
+          [Yy]|Yes|yes )
+            break ;;
+          [Nn]|No|no|"" )
+            print ":: Skipping..."
+            continue 2 ;;
+          * ) ;;
+        esac
+      done
 
     overwrite= # reset in case set by previous iterations
     if [ -e "$dst" ]; then
@@ -263,8 +351,8 @@ config () {
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
       cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered \
-          --parents "$dst" "$CFG_BACKUP_DIR" &&
-        print ":: Backed up $filetype to $(realpath "$CFG_BACKUP_DIR/$dst")" ||
+          --parents "$dst" "$cfg_backup_dir" &&
+        print ":: Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
         while true; do
           printf ":: Failed to back up $filetype, "
           [ "$force" = true ] && print "overwriting anyway with -f" && break ||
@@ -282,22 +370,8 @@ config () {
       overwrite=true
     fi
 
-    sudo= # need to unset in case set on previous iteration
     if [ ! -w "$d" ]; then
-      while [ -z "$root" ]; do
-        printf ":: Missing write access for destination $d, continue as root? (Y/n) "
-        read yn
-        case $yn in
-          [Yy]|Yes|yes|"" )
-            root=true
-            break ;;
-          [Nn]|No|no )
-            root=false
-            break ;;
-          * ) ;;
-        esac
-      done
-
+      request_root root ":: Missing write access for destination $d, continue as root?"
       [ "$root" = true ] && sudo="sudo -E" ||
           {print ":: Root access required, skipping..." && continue }
     fi
@@ -308,13 +382,15 @@ config () {
         $( [ "$overwrite" = true ] && echo "-f") \
         $( [ "$copy" = true ] || echo "-s") \
         2>/dev/null" &&
-      { [ "$copy" = true ] &&
+      { { print "$dst" >> "$cfg_state" } &&
+        [ "$copy" = true ] &&
         print ":: Copied file" ||
         print ":: Created symbolic link" } ||
       { [ "$copy" = true ] &&
         print ":: Could not copy file" ||
         print ":: Could not create symbolic link" }
   done
+  [ -f "$cfg_state" ] && sort -u "$cfg_state" -o "$cfg_state"
 }
 
 hosts() {
@@ -351,7 +427,7 @@ case $cmd in
   backup) backup "${@:2}" ;;
   update) update "${@:2}" ;;
   restore) restore "${@:2}" ;;
-  config) config -i "$REPO_DIR" -o / "${@:2}" ;;
+  config) config -i "$repo_dir" -o / "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
   *) echo "Invalid command $cmd" >&2
