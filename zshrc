@@ -51,9 +51,23 @@ alias red='redshift -l 44.915194:-93.1044794'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 
 # packages
-alias pacsearch='pacman -Ss'
-alias pacinfo='pacman -Q --info'
-alias pacrm='sudo pacman -Rs'
+pacman-cheatsheet () {
+  # there's definitely a better way to do a multi-line string like this.
+  # but I'm too lazy to look for it
+  print "pacman cheatsheet"
+  print "    pacman -Qs <regex>                      -- search installed packages"
+  print "    pacman -Qe                              -- list explicitly installed packages"
+  print "    pacman -Qent                            -- list explicitly installed native packages that are not direct or optional dependencies"
+  print "    pacman -Qd                              -- list packages installed as dependencies"
+  print "    pacman -Qdt                             -- list orphan dependencies"
+  print "    pacman -Qtdq | pacman -Rns -            -- recursively remove orphans and their config files"
+  print "    pacman -Ss <regex>                      -- search all packages"
+  print "    pacman -Q --info <pkg>                  -- info on installed package"
+  print "    pacman -S --info <pkg>                  -- info on any package"
+  print "    pacman -Rs <pkg>                        -- remove package and any dangling dependencies"
+  print "    pacman -D --asexplicit <pkgs>           -- mark packages explicitly installed"
+  print "    pacman -D --asdeps <pkgs>               -- mark packages installed as dependencies"
+}
 alias makepkg-rebuild='makepkg -fi'
 alias initpkgsums='makepkg -g >> PKGBUILD'
 
