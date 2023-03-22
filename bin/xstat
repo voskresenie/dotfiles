@@ -21,7 +21,7 @@ readonly refreshrate="$r"
 statusbar () {
   local fields=("$(mpc current -f "NOW PLAYING : %artist% - %title%")"
                 "$(amixer sget Master | sed -n '0,/.*\[\([[:digit:]]\{1,3\}%\)\].*/ s//VOLUME \1/p')"
-                "$(acpi -b | sed -n 's/.*, \([[:digit:]]\{1,3\}%\).*/BATTERY \1/p')"
+                "$(acpi -b | sed -n -r -e 's/.*(Discharging|Charging|Not charging|Full), ([[:digit:]]{1,3}%).*/BATTERY \2\1/' -e 's/(.*)Discharging/↓ \1/p' -e 's/(.*)Charging/↑ \1/p' -e 's/(.*)(Not charging|Full)/○ \1/p')"
                 "$(xbacklight -get | sed -n 's/\([[:digit:]]\{1,3\}\)\.[[:digit:]]*/BRIGHTNESS \1%/p')"
                 "$(date +"%^a %d %^b %Y %l:%M:%S %p")")
   str=
