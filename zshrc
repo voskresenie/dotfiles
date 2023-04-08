@@ -84,8 +84,25 @@ screengrab() {
 # media
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
 alias media='cd /mnt/media'
-alias mpv='mpv -fs'
 #alias ncmpcpp='ncmpcpp -h valhalla'
+alias mpv='mpv -fs'
+play () {
+  (mpv "${@:1}" &) &>/dev/null
+}
+film () {
+  local f="$1"
+  ls -d /mnt/media/film/* | grep -E "$f" |
+    tee >(xargs mpv &>/dev/null &)
+}
+tv () {
+  local series="$1"
+  local season="$2"
+  local episode="$3"
+  ls -d /mnt/media/tv/*${series}*/* | #grep -E "$series" |
+    #xargs ls -d | grep -E "[sS][0-9]*${season}.*[eE]${episode}" |
+    grep -E "[sS][0-9]*${season}.*[eE][0-9]*${episode}" |
+    tee >(xargs mpv &>/dev/null &)
+}
 
 # gaming
 alias steamdep='ldd ~/.local/share/Steam/ubuntu12_32/steamclient.so'
