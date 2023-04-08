@@ -49,6 +49,7 @@ alias hdmi+mirror='xrandr --output HDMI1 --auto --same-as eDP1 --scale-from 1920
 alias hdmi-='xrandr --output HDMI1 --off'
 alias red='redshift -l 44.915194:-93.1044794'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
+alias showdrivers='lspci -v'
 
 # packages
 pacman-cheatsheet () {
