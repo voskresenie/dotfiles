@@ -63,6 +63,7 @@ cfgs=(
       "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
       "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
       "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
+      "redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
       "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
       "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
       "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
