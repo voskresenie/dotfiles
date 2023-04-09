@@ -70,10 +70,10 @@ cfgs=(
       "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
       "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
       "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
-      "xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
-      "xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
-      "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
       "X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+      "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+      "X11/xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
+      "X11/xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
       "X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
       "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
       "zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
