@@ -354,7 +354,7 @@ config () {
           msg=":: Destination and source are identical" } } &&
       { [ "$force" = true ] && vprint $verbose "$msg, overwriting anyway with -f" ||
         { vprint $verbose "$msg, skipping" &&
-          veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"cfg_state\" &&
+          veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"$cfg_state\" &&
           continue } }
 
     [ "$prmpt" = true ] &&
@@ -435,7 +435,7 @@ config () {
         $( [ "$overwrite" = true ] && echo "-f") \
         $( [ "$copy" = true ] || echo "-s") \
         2>/dev/null" &&
-      { veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"cfg_state\" &&
+      { veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"$cfg_state\" &&
         [ "$copy" = true ] &&
         vprint $verbose ":: Copied file" ||
         vprint $verbose ":: Created symbolic link" } ||
