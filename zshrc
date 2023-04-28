@@ -47,9 +47,10 @@ export GOPATH=$HOME
 alias hdmi+='xrandr --output HDMI1 --auto --above eDP1'
 alias hdmi+mirror='xrandr --output HDMI1 --auto --same-as eDP1 --scale-from 1920x1080'
 alias hdmi-='xrandr --output HDMI1 --off'
-alias red='redshift -l 44.915194:-93.1044794'
-alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
+alias red='redshift'
 alias showdrivers='lspci -v'
+alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
+alias swapesc='setxkbmap -option caps:swapescape'
 
 # packages
 pacman-cheatsheet () {
@@ -68,6 +69,8 @@ pacman-cheatsheet () {
   print "    pacman -Rs <pkg>                        -- remove package and any dangling dependencies"
   print "    pacman -D --asexplicit <pkgs>           -- mark packages explicitly installed"
   print "    pacman -D --asdeps <pkgs>               -- mark packages installed as dependencies"
+  print
+  print "    pkgfile <command>                       -- search packages providing command"
 }
 alias makepkg-rebuild='makepkg -fi'
 alias initpkgsums='makepkg -g >> PKGBUILD'
