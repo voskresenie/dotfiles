@@ -193,7 +193,8 @@ update () {
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
     desc="${cmds[$i]%%:*}"
     cmd="${cmds[$i]#*:}"
-    veval true ":: $desc" "$cmd" ||
+    print ":: $desc"
+    veval true "$cmd" ||
       { print ':: failed to complete update' && break }
   done
   print ':: successfully updated system'
@@ -235,17 +236,15 @@ vprint () {
 
 # verbose eval
 #
-# usage: veval VERBOSE? MESSAGE CMD...
+# usage: veval VERBOSE? CMD...
 #
 # Usage same as eval (ie command may require escaping). VERBOSE param, if taken
 # from a variable, should be quoted if there is a chance it will be null.
 #
 veval () {
   local __verbose="$1"
-  local __msg="$2"
-  local __cmd="${@:3}"
+  local __cmd="${@:2}"
   if [ "$__verbose" = true ]; then
-    [ -n "$__msg" ] && print "$__msg"
     [ -n "$__cmd" ] && print "$__cmd"
   fi
   eval $__cmd
@@ -307,29 +306,28 @@ config () {
         cfg="$existing_cfgs[$i]"
         printf "(%d/%d) %s\n" "$i" "${#existing_cfgs[@]}" "$cfg"
 
-        veval $verbose ":: Backing up file before removing" \
-          cp -u --backup=numbered --parents \"$cfg\" \"$cfg_backup_dir\"
+        vprint $verbose ":: Backing up file before removing"
+        veval $verbose cp -u --backup=numbered --parents \"$cfg\" \"$cfg_backup_dir\"
 
         sudo= # reset in case set by previous iterations
         if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
           request_root root ":: Missing write access for file, continue as root?"
           [ "$root" = true ] && sudo="sudo -E " || {
             print ":: Root access required, skipping..."
-            veval $verbose ":: Writing filename to temporary file to be preserved in config state file" \
-              print \"$cfg\" ">>" \"$tmp\"
+            vprint $verbose ":: Writing filename to temporary file to be preserved in config state file"
+            veval $verbose print \"$cfg\" ">>" \"$tmp\"
             continue
           }
         fi
-        veval $verbose ":: Removing config$([ -n "$sudo" ] && print " as root")" \
-          $sudo rm \"$cfg\" &&
-          vprint $verbose ":: Removed config" || {
-            print ":: Could not remove config"
-            veval $verbose ":: Writing filename to temporary file to be preserved in config state file" \
-              print \"$cfg\" ">>" \"$tmp\"
-          }
+        vprint $verbose ":: Removing config$([ -n "$sudo" ] && print " as root")"
+        veval $verbose $sudo rm \"$cfg\" || {
+          print ":: Could not remove config"
+          vprint $verbose ":: Writing filename to temporary file to be preserved in config state file"
+          veval $verbose print \"$cfg\" ">>" \"$tmp\"
+        }
       done
-      veval $verbose ":: Replacing config state file with temporary file" \
-        mv \"$tmp\" \"$cfg_state\"
+      vprint $verbose ":: Replacing config state file with temporary file"
+      veval $verbose mv \"$tmp\" \"$cfg_state\"
     fi
     exit
   fi
@@ -353,15 +351,16 @@ config () {
       { [ -d "$dst" ] && filetype="directory" } ||
       { [ -f "$dst" ] && filetype="file" }
 
-    veval $verbose ":: Comparing source to destination" \
-      cmp --silent \"$src\" \"$dst\" &&
+    vprint $verbose ":: Comparing source to destination"
+    veval $verbose cmp --silent \"$src\" \"$dst\" &&
       { { [ -h "$dst" ] && [ ! "$copy" = true ] && [ "$(readlink -f "$dst")" = "$src" ] &&
-          msg=":: Destination is symlink to source" } ||
+          msg="Destination is symlink to source" } ||
         { [ ! -h "$dst" ] && [ "$copy" = true ] &&
-          msg=":: Destination and source are identical" } } &&
-      { [ "$force" = true ] && vprint $verbose "$msg, overwriting anyway with -f" ||
+          msg="Destination and source are identical" } } &&
+      { [ "$force" = true ] && vprint $verbose ":: $msg, overwriting anyway with -f" ||
         { vprint $verbose "$msg, skipping" &&
-          veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"$cfg_state\" &&
+          vprint $verbose ":: Adding to config state file" &&
+          veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
           continue } }
 
     [ "$prmpt" = true ] &&
@@ -397,7 +396,8 @@ config () {
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
       cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
-      veval $verbose ":: Backing up existing $filetype before overwriting" $cmd &&
+      vprint $verbose ":: Backing up existing $filetype before overwriting"
+      veval $verbose $cmd &&
         vprint $verbose ":: Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
         { [ "$force" = true ] &&
             vprint $verbose ":: Failed to back up $filetype, overwriting anyway with -f" ||
@@ -434,15 +434,15 @@ config () {
           { print ":: Root access required, skipping..." && continue }
     fi
 
-    veval $verbose ":: Making missing directories in path" \
-      $sudo mkdir -p \"$(dirname "$dst")\"
-    veval $verbose "" \
-      "${sudo}cp \"$src\" \"$dst\" \
-        $( [ -h "$dst" ] && echo "--remove-destination") \
-        $( [ "$overwrite" = true ] && echo "-f") \
-        $( [ "$copy" = true ] || echo "-s") \
-        2>/dev/null" &&
-      { veval $verbose ":: Adding to config state file" print \"$dst\" ">>" \"$cfg_state\" &&
+    vprint $verbose ":: Making missing directories in path"
+    veval $verbose $sudo mkdir -p \"$(dirname "$dst")\"
+    veval $verbose "${sudo}cp \"$src\" \"$dst\" \
+      $( [ -h "$dst" ] && echo "--remove-destination") \
+      $( [ "$overwrite" = true ] && echo "-f") \
+      $( [ "$copy" = true ] || echo "-s") \
+      2>/dev/null" &&
+      { vprint $verbose ":: Adding to config state file" &&
+        veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
         [ "$copy" = true ] &&
         vprint $verbose ":: Copied file" ||
         vprint $verbose ":: Created symbolic link" } ||
