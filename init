@@ -184,6 +184,23 @@ backup () {
   grep upgrade /var/log/pacman.log | tail -1 | cut -c 2-11 > "$state_dir"/last_update
 }
 
+orphan-deps() {
+  local OPTIND opt
+  local quiet verbose=false
+  while getopts ":qv" opt; do
+    case $opt in
+      q) quiet=true ;;
+      v) verbose=true ;;
+      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+    esac
+  done
+
+  local orphs=$(pacman -Qtdq | wc -l)
+  [ ! "$quiet" = true ] && [ "$orphs" -eq 0 ] && print " no orphaned dependencies"
+  [ "$orphs" -ne 0 ] && print "${YELLOW}warning:$RESET $orphs orphaned dependencies"
+  [ "$verbose" = true ] && pacman -Qtdq
+}
+
 update () {
   local OPTIND opt
   local quiet verbose=false
@@ -203,7 +220,7 @@ update () {
               'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman -S archlinux-keyring 1>/dev/null 2>/dev/null:'
               'Updating packages:sudo pacman -Su:yes | sudo pacman -Su 1>/dev/null 2>/dev/null:'
               'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
-              'Checking for orphaned dependencies:pacman -Qtdq || print " no orphaned dependencies":__orphs=$(pacman -Qtdq | wc -l) && [ $__orphs -eq 0 ] || print " $__orphs orphaned dependencies":'
+              'Checking for orphaned dependencies:orphan-deps:orphan-deps -q:orphan-deps -v'
               'Updating abs:abs:false:'
               'Updating pkgfile:sudo pkgfile -u 1>/dev/null::'
               'Updating mlocate db:sudo updatedb::'
