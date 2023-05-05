@@ -182,26 +182,46 @@ backup () {
 }
 
 update () {
-  local cmds=('updating package database:sudo pacman -Sy'
-              #'updating keys:sudo pacman-key --refresh-keys'
-              'updating keys:yes | sudo pacman -S archlinux-keyring'
-              'updating packages:sudo pacman -Su'
-              # (redundant with -Sy)
-              #'update package search:sudo pacman -Fy'
-              'checking for orphaned dependencies:pacman -Qtdq || print no orphaned packages'
-              'updating pkgfile:sudo pkgfile -u'
-              'updating mlocate db:sudo updatedb'
-              'updating vundle:vim +BundleUpdate +q +q'
-              'syncing hwclock with ntpd:sudo ntpd -qg && sudo hwclock --systohc'
+  local OPTIND opt
+  local quiet verbose=false
+  while getopts ":qv" opt; do
+    case $opt in
+      q) quiet=true ;;
+      v) verbose=true ;;
+      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+    esac
+  done
+
+  # "description:normal command:[quiet command]:[verbose command]"
+  local cmds=(
+              'Updating package database:sudo pacman -Sy::'
+              #'Updating package keys:sudo pacman-key --refresh-keys::'
+              #'Updating package keys:sudo pacman-key --updatedb::'
+              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman -S archlinux-keyring 1>/dev/null 2>/dev/null:'
+              'Updating packages:sudo pacman -Su:yes | sudo pacman -Su 1>/dev/null 2>/dev/null:'
+              'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
+              'Checking for orphaned dependencies:pacman -Qtdq || print " no orphaned dependencies":__orphs=$(pacman -Qtdq | wc -l) && [ $__orphs -eq 0 ] || print " $__orphs orphaned dependencies":'
+              'Updating abs:abs:false:'
+              'Updating pkgfile:sudo pkgfile -u 1>/dev/null::'
+              'Updating mlocate db:sudo updatedb::'
+              'Updating vundle:nvim +BundleUpdate +q +q::'
+              'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
               )
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
-    desc="${cmds[$i]%%:*}"
-    cmd="${cmds[$i]#*:}"
-    print ":: $desc"
-    veval true "$cmd" ||
-      { print ':: failed to complete update' && break }
+    parts=("${(@s[:])cmds[$i]}")
+    desc="$parts[1]"
+    cmd="$parts[2]"
+    if [ "$quiet" = true ]; then
+      [ "$parts[3]" = false ] && print ":: $desc -- skipping in quiet mode" && continue
+      [ -n "$parts[3]" ] && cmd="$parts[3]" || cmd="$cmd 1>/dev/null"
+    elif [ "$verbose" = true ]; then
+      [ -n "$parts[4]" ] && cmd="$parts[4]"
+    fi
+    print ":: $desc..."
+    veval $verbose "$cmd" ||
+      { print ':: Failed to complete update' && return }
   done
-  print ':: successfully updated system'
+  print ':: Successfully updated system'
 }
 
 restore () {
