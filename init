@@ -15,6 +15,9 @@ repo_dir="$(realpath "$(dirname "$0")")"
 source "$repo_dir"/global/profile
 source "$repo_dir"/profile
 
+source "$repo_dir"/colors/env
+PREFIX="$BLUE::$RESET"
+
 # these should already be set by one of the profile files, but might be worth
 # keeping around anyway just in case
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-~/.config}"
@@ -24,8 +27,6 @@ XDG_DATA_HOME="${XDG_DATA_HOME:-~/.local/share}"
 pkgname=voskarch
 state_dir="$XDG_STATE_HOME/$pkgname"
 data_dir="$XDG_DATA_HOME/$pkgname"
-
-PREFIX="$BLUE::$RESET"
 
 # directory for backing up config files before overwriting
 cfg_backup_dir="$state_dir/cfg/backup"
@@ -221,9 +222,9 @@ update () {
     fi
     print "$PREFIX $desc..."
     veval $verbose "$cmd" ||
-      { print '$PREFIX Failed to complete update' && return }
+      { print "$PREFIX Failed to complete update" && return }
   done
-  print '$PREFIX Successfully updated system'
+  print "$PREFIX Successfully updated system"
 }
 
 restore () {
