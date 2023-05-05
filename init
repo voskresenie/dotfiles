@@ -148,6 +148,10 @@ abs () {
     cd $HOME/abs
     [ ! -d "$pkg" ] && git clone https://aur.archlinux.org/"$pkg".git
     cd "$pkg"
+
+    # skip if up to date
+    [ $(git pull --dry-run | wc -l) -eq 0 ] && continue
+
     git pull
     less PKGBUILD
     while true; do
