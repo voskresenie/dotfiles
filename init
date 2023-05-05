@@ -25,6 +25,8 @@ pkgname=voskarch
 state_dir="$XDG_STATE_HOME/$pkgname"
 data_dir="$XDG_DATA_HOME/$pkgname"
 
+PREFIX="$BLUE::$RESET"
+
 # directory for backing up config files before overwriting
 cfg_backup_dir="$state_dir/cfg/backup"
 # file for keeping track of configs managed by script
@@ -99,7 +101,7 @@ prereq () {
 init () {
   if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
     while true; do
-      printf ":: repo located at $repo_dir; move to $data_dir? (y/N) "
+      printf "$PREFIX repo located at $repo_dir; move to $data_dir? (y/N) "
       read yn
       case $yn in
         [Yy]|Yes|yes )
@@ -108,7 +110,7 @@ init () {
           cd "$data_dir"
           rm -rf "$repo_dir"
           repo_dir="$data_dir"
-          print ":: new repo location: $repo_dir"
+          print "$PREFIX new repo location: $repo_dir"
           break ;;
         [Nn]|No|no|"" ) break ;;
         * ) ;;
@@ -155,13 +157,13 @@ abs () {
     git pull
     less PKGBUILD
     while true; do
-      printf ":: Build package $pkg? (y/n/V) "
+      printf "$PREFIX Build package $pkg? (y/n/V) "
       read yn
       case $yn in
         [Yy]|Yes|yes )
           break ;;
         [Nn]|No|no|"" )
-          print ":: Skipping..."
+          print "$PREFIX Skipping..."
           continue 2 ;;
         [Vv]|View|view )
           less PKGBUILD ;;
@@ -212,16 +214,16 @@ update () {
     desc="$parts[1]"
     cmd="$parts[2]"
     if [ "$quiet" = true ]; then
-      [ "$parts[3]" = false ] && print ":: $desc -- skipping in quiet mode" && continue
+      [ "$parts[3]" = false ] && print "$PREFIX $desc -- skipping in quiet mode" && continue
       [ -n "$parts[3]" ] && cmd="$parts[3]" || cmd="$cmd 1>/dev/null"
     elif [ "$verbose" = true ]; then
       [ -n "$parts[4]" ] && cmd="$parts[4]"
     fi
-    print ":: $desc..."
+    print "$PREFIX $desc..."
     veval $verbose "$cmd" ||
-      { print ':: Failed to complete update' && return }
+      { print '$PREFIX Failed to complete update' && return }
   done
-  print ':: Successfully updated system'
+  print '$PREFIX Successfully updated system'
 }
 
 restore () {
@@ -315,13 +317,13 @@ config () {
   local root sudo
 
   if [ "$list" = true ]; then
-    print ":: Files managed by $pkgname $0:"
+    print "$PREFIX Files managed by $pkgname $0:"
     [ -f "$cfg_state" ] && cat "$cfg_state"
     return
   fi
 
   if [ "$clean" = true ]; then
-    print ":: Removing files managed by $pkgname $0:"
+    print "$PREFIX Removing files managed by $pkgname $0:"
     if [ -f "$cfg_state" ]; then
       local tmp="$(mktemp)"
       local existing_cfgs=("${(@f)$(< "$cfg_state")}")
@@ -330,27 +332,27 @@ config () {
         cfg="$existing_cfgs[$i]"
         printf "(%d/%d) %s\n" "$i" "${#existing_cfgs[@]}" "$cfg"
 
-        vprint $verbose ":: Backing up file before removing"
+        vprint $verbose "$PREFIX Backing up file before removing"
         veval $verbose cp -u --backup=numbered --parents \"$cfg\" \"$cfg_backup_dir\"
 
         sudo= # reset in case set by previous iterations
         if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
-          request_root root ":: Missing write access for file, continue as root?"
+          request_root root "$PREFIX Missing write access for file, continue as root?"
           [ "$root" = true ] && sudo="sudo -E " || {
-            print ":: Root access required, skipping..."
-            vprint $verbose ":: Writing filename to temporary file to be preserved in config state file"
+            print "$PREFIX Root access required, skipping..."
+            vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in config state file"
             veval $verbose print \"$cfg\" ">>" \"$tmp\"
             continue
           }
         fi
-        vprint $verbose ":: Removing config$([ -n "$sudo" ] && print " as root")"
+        vprint $verbose "$PREFIX Removing config$([ -n "$sudo" ] && print " as root")"
         veval $verbose $sudo rm \"$cfg\" || {
-          print ":: Could not remove config"
-          vprint $verbose ":: Writing filename to temporary file to be preserved in config state file"
+          print "$PREFIX Could not remove config"
+          vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in config state file"
           veval $verbose print \"$cfg\" ">>" \"$tmp\"
         }
       done
-      vprint $verbose ":: Replacing config state file with temporary file"
+      vprint $verbose "$PREFIX Replacing config state file with temporary file"
       veval $verbose mv \"$tmp\" \"$cfg_state\"
     fi
     exit
@@ -362,8 +364,8 @@ config () {
   #
   # TODO: add detection for whether existing destination is NOT a symlink
 
-  [ "$copy" = true ] && vprint $verbose ":: Copying files..." || vprint $verbose ":: Linking files..."
-  [ "$force" = true ] && vprint $verbose ":: Overwriting existing files with -f"
+  [ "$copy" = true ] && vprint $verbose "$PREFIX Copying files..." || vprint $verbose "$PREFIX Linking files..."
+  [ "$force" = true ] && vprint $verbose "$PREFIX Overwriting existing files with -f"
 
   local src dst d filetype overwrite
   for (( i=1 ; i<=${#cfgs[@]} ; i++ )); do
@@ -375,27 +377,27 @@ config () {
       { [ -d "$dst" ] && filetype="directory" } ||
       { [ -f "$dst" ] && filetype="file" }
 
-    vprint $verbose ":: Comparing source to destination"
+    vprint $verbose "$PREFIX Comparing source to destination"
     veval $verbose cmp --silent \"$src\" \"$dst\" &&
       { { [ -h "$dst" ] && [ ! "$copy" = true ] && [ "$(readlink -f "$dst")" = "$src" ] &&
           msg="Destination is symlink to source" } ||
         { [ ! -h "$dst" ] && [ "$copy" = true ] &&
           msg="Destination and source are identical" } } &&
-      { [ "$force" = true ] && vprint $verbose ":: $msg, overwriting anyway with -f" ||
+      { [ "$force" = true ] && vprint $verbose "$PREFIX $msg, overwriting anyway with -f" ||
         { vprint $verbose "$msg, skipping" &&
-          vprint $verbose ":: Adding to config state file" &&
+          vprint $verbose "$PREFIX Adding to config state file" &&
           veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
           continue } }
 
     [ "$prmpt" = true ] &&
       while true; do
-        printf ":: %s file? (y/N) " $([ "$copy" = true ] && print "Copy" || print "Link")
+        printf "$PREFIX %s file? (y/N) " $([ "$copy" = true ] && print "Copy" || print "Link")
         read yn
         case $yn in
           [Yy]|Yes|yes )
             break ;;
           [Nn]|No|no|"" )
-            vprint $verbose ":: Skipping..."
+            vprint $verbose "$PREFIX Skipping..."
             continue 2 ;;
           * ) ;;
         esac
@@ -405,13 +407,13 @@ config () {
     if [ -e "$dst" ]; then
       [ ! "$force" = true ] &&
         while true; do
-          printf ":: Destination $filetype $(basename "$dst") exists, overwrite? (y/N) "
+          printf "$PREFIX Destination $filetype $(basename "$dst") exists, overwrite? (y/N) "
           read yn
           case $yn in
             [Yy]|Yes|yes )
               break ;;
             [Nn]|No|no|"" )
-              vprint $verbose ":: Skipping..."
+              vprint $verbose "$PREFIX Skipping..."
               continue 2 ;;
             * ) ;;
           esac
@@ -420,19 +422,19 @@ config () {
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
       cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
-      vprint $verbose ":: Backing up existing $filetype before overwriting"
+      vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
       veval $verbose $cmd &&
-        vprint $verbose ":: Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
+        vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
         { [ "$force" = true ] &&
-            vprint $verbose ":: Failed to back up $filetype, overwriting anyway with -f" ||
+            vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
             while true; do
-              printf ":: Failed to back up $filetype, overwrite anyway? (y/N) "
+              printf "$PREFIX Failed to back up $filetype, overwrite anyway? (y/N) "
               read yn
               case $yn in
                 [Yy]|Yes|yes )
                   break ;;
                 [Nn]|No|no|"" )
-                  print ":: Skipping..."
+                  print "$PREFIX Skipping..."
                   continue 2 ;;
                 * ) ;;
               esac
@@ -453,26 +455,26 @@ config () {
 
     sudo= # reset in case set by previous iterations
     if [ ! -w "$d" ]; then
-      request_root root ":: Missing write access for destination $d, continue as root?"
+      request_root root "$PREFIX Missing write access for destination $d, continue as root?"
       [ "$root" = true ] && sudo="sudo -E" ||
-          { print ":: Root access required, skipping..." && continue }
+          { print "$PREFIX Root access required, skipping..." && continue }
     fi
 
-    vprint $verbose ":: Making missing directories in path"
+    vprint $verbose "$PREFIX Making missing directories in path"
     veval $verbose $sudo mkdir -p \"$(dirname "$dst")\"
     veval $verbose "${sudo}cp \"$src\" \"$dst\" \
       $( [ -h "$dst" ] && echo "--remove-destination") \
       $( [ "$overwrite" = true ] && echo "-f") \
       $( [ "$copy" = true ] || echo "-s") \
       2>/dev/null" &&
-      { vprint $verbose ":: Adding to config state file" &&
+      { vprint $verbose "$PREFIX Adding to config state file" &&
         veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
         [ "$copy" = true ] &&
-        vprint $verbose ":: Copied file" ||
-        vprint $verbose ":: Created symbolic link" } ||
+        vprint $verbose "$PREFIX Copied file" ||
+        vprint $verbose "$PREFIX Created symbolic link" } ||
       { [ "$copy" = true ] &&
-        print ":: Could not copy file" ||
-        print ":: Could not create symbolic link" }
+        print "$PREFIX Could not copy file" ||
+        print "$PREFIX Could not create symbolic link" }
   done
   [ -f "$cfg_state" ] && sort -u "$cfg_state" -o "$cfg_state"
 }
