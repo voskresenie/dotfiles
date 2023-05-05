@@ -51,6 +51,20 @@ alias red='redshift'
 alias showdrivers='lspci -v'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 alias swapesc='setxkbmap -option caps:swapescape'
+sysupdate () {
+  # update keys
+  yes | sudo pacman -Syy archlinux-keyring &&
+    # and all packages if successful
+    sudo pacman -Su
+  # check for orphaned dependencies
+  pacman -Qtd
+  # update pkgfile db
+  sudo pkgfile --update
+  # update mlocate db
+  sudo updatedb
+  # sync hwclock with ntpd
+  syncclock
+}
 
 # packages
 pacman-cheatsheet () {
@@ -58,7 +72,8 @@ pacman-cheatsheet () {
   # but I'm too lazy to look for it
   print "pacman cheatsheet"
   print "    pacman -Qs <regex>                      -- search installed packages"
-  print "    pacman -Qe                              -- list explicitly installed packages"
+  print "    pacman -Qeq                             -- list explicitly installed packages"
+  print "    pacman -Qe                              -- list explicitly installed packages with version number"
   print "    pacman -Qent                            -- list explicitly installed native packages that are not direct or optional dependencies"
   print "    pacman -Qd                              -- list packages installed as dependencies"
   print "    pacman -Qdt                             -- list orphan dependencies"
