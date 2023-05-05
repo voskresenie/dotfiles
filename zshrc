@@ -51,20 +51,6 @@ alias red='redshift'
 alias showdrivers='lspci -v'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 alias swapesc='setxkbmap -option caps:swapescape'
-sysupdate () {
-  # update keys
-  yes | sudo pacman -Syy archlinux-keyring &&
-    # and all packages if successful
-    sudo pacman -Su
-  # check for orphaned dependencies
-  pacman -Qtd
-  # update pkgfile db
-  sudo pkgfile --update
-  # update mlocate db
-  sudo updatedb
-  # sync hwclock with ntpd
-  syncclock
-}
 
 # packages
 pacman-cheatsheet () {

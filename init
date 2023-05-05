@@ -178,18 +178,25 @@ backup () {
 }
 
 update () {
-  echo "update not implemented" >&2
-
-  # update packages
-  sudo pacman -Syyu
-  abs
-
-  # update package search
-  sudo pacman -Fy
-  sudo pkgfile -u
-
-  # update vundle
-  vim +BundleUpdate +q +q
+  local cmds=('updating package database:sudo pacman -Sy'
+              #'updating keys:sudo pacman-key --refresh-keys'
+              'updating keys:yes | sudo pacman -S archlinux-keyring'
+              'updating packages:sudo pacman -Su'
+              # (redundant with -Sy)
+              #'update package search:sudo pacman -Fy'
+              'checking for orphaned dependencies:pacman -Qtdq || print no orphaned packages'
+              'updating pkgfile:sudo pkgfile -u'
+              'updating mlocate db:sudo updatedb'
+              'updating vundle:vim +BundleUpdate +q +q'
+              'syncing hwclock with ntpd:sudo ntpd -qg && sudo hwclock --systohc'
+              )
+  for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
+    desc="${cmds[$i]%%:*}"
+    cmd="${cmds[$i]#*:}"
+    veval true ":: $desc" "$cmd" ||
+      { print ':: failed to complete update' && break }
+  done
+  print ':: successfully updated system'
 }
 
 restore () {
