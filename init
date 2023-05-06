@@ -218,8 +218,8 @@ update () {
               'Updating package database:sudo pacman -Sy::'
               #'Updating package keys:sudo pacman-key --refresh-keys::'
               #'Updating package keys:sudo pacman-key --updatedb::'
-              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman -S archlinux-keyring 1>/dev/null 2>/dev/null:'
-              'Updating packages:sudo pacman -Su:yes | sudo pacman -Su 1>/dev/null 2>/dev/null:'
+              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman --color always -S archlinux-keyring 1>/dev/null:'
+              'Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su 1>/dev/null 2>/dev/null:'
               'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
               'Checking for orphaned dependencies:orphan-deps:orphan-deps -q:orphan-deps -v'
               'Updating abs:abs:false:'
@@ -258,13 +258,22 @@ restore () {
   sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
 }
 
+# error
+#
+# usage: error MESSAGE
+#
+error () {
+  local __msg="${@:1}"
+  print >&2 "${RED}error:$RESET $__msg"
+}
+
 # warn
 #
 # usage: warn MESSAGE
 #
 warn () {
   local __msg="${@:1}"
-  print "${YELLOW}warning:$RESET $__msg"
+  print >&2 "${YELLOW}warning:$RESET $__msg"
 }
 
 # verbose print
