@@ -197,7 +197,7 @@ orphan-deps () {
 
   local orphs=$(pacman -Qtdq | wc -l)
   [ ! "$quiet" = true ] && [ "$orphs" -eq 0 ] && print " no orphaned dependencies"
-  [ "$orphs" -ne 0 ] && print "${YELLOW}warning:$RESET $orphs orphaned dependencies"
+  [ "$orphs" -ne 0 ] && warn "$orphs orphaned dependencies"
   [ "$verbose" = true ] && pacman -Qtdq
   return 0
 }
@@ -256,6 +256,15 @@ restore () {
   yes | pacman -Syyuu
 
   sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+}
+
+# warn
+#
+# usage: warn MESSAGE
+#
+warn () {
+  local __msg="${@:1}"
+  print "${YELLOW}warning:$RESET $__msg"
 }
 
 # verbose print
