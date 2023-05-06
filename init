@@ -199,6 +199,7 @@ orphan-deps() {
   [ ! "$quiet" = true ] && [ "$orphs" -eq 0 ] && print " no orphaned dependencies"
   [ "$orphs" -ne 0 ] && print "${YELLOW}warning:$RESET $orphs orphaned dependencies"
   [ "$verbose" = true ] && pacman -Qtdq
+  return 0
 }
 
 update () {
