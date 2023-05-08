@@ -27,8 +27,8 @@
 #
 #   parameter               default
 #   playlist_directory      <empty>
-#   db_file                 ${XDG_CONFIG_HOME:~/.config}/mpd/database_{library_name}
-#   state_file              ${XDG_CONFIG_HOME:~/.config}/mpd/state_{library_name}
+#   db_file                 ${XDG_DATA_HOME:~/.local/share}/mpd/database_{library_name}
+#   state_file              ${XDG_DATA_HOME:~/.local/state}/mpd/state_{library_name}
 #
 # By default, mpdlib will look for a running mpd service process first at the
 # global level followed by the user level, and choose between global / user
@@ -90,7 +90,7 @@ readonly library="$args[1]"
 # 3) user running script
 [ -z "$user" ] && { [ "$EUID" = 0 ] && [ -z "$user" ] && { user=false || user=true } }
 
-user_conf="$XDG_CONFIG_HOME/mpd/mpdlib.conf"
+user_conf="${XDG_CONFIG_HOME:-~/.config}/mpd/mpdlib.conf"
 sys_conf="/etc/mpdlib.conf"
 [ "$user" = true ] && [ -e "$user_conf" ] && conf="$user_conf" ||
   { [ -e "$sys_conf" ] && conf="$sys_conf" }
@@ -178,10 +178,10 @@ libcfg[mpd_conf]="$(parse_path "$libcfg[mpd_conf]")"
 [ -z "$libcfg[name]" ] && suffix= || suffix="_$libcfg[name]"
 libcfg[name]=&&libcfg[default]=
 
-   libcfg[music_directory]="$(parse_path "${libcfg[music_directory]:-"$XDG_CONFIG_HOME/mpd/library$suffix"}")"
-libcfg[playlist_directory]="$(parse_path "${libcfg[playlist_directory]:-"$XDG_CONFIG_HOME/mpd/playlists$suffix"}")"
-           libcfg[db_file]="$(parse_path "${libcfg[db_file]:-"$XDG_CONFIG_HOME/mpd/database$suffix"}")"
-        libcfg[state_file]="$(parse_path "${libcfg[state_file]:-"$XDG_CONFIG_HOME/mpd/state$suffix"}")"
+   libcfg[music_directory]="$(parse_path "${libcfg[music_directory]:-"${XDG_DATA_HOME:-~/.local/share}/mpd/library$suffix"}")"
+libcfg[playlist_directory]="$(parse_path "${libcfg[playlist_directory]:-"${XDG_DATA_HOME:-~/.local/share}/mpd/playlists$suffix"}")"
+           libcfg[db_file]="$(parse_path "${libcfg[db_file]:-"${XDG_DATA_HOME:-~/.local/share}/mpd/database$suffix"}")"
+        libcfg[state_file]="$(parse_path "${libcfg[state_file]:-"${XDG_STATE_HOME:-~/.local/state}/mpd/state$suffix"}")"
 
 if [ "$verbose" = true ]; then
   print ":: Using base mpd config $base_mpd_conf"
