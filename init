@@ -12,10 +12,10 @@
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
 repo_dir="$(realpath "$(dirname "$0")")"
-source "$repo_dir"/global/profile.d/user.sh
-source "$repo_dir"/profile
+source "$repo_dir"/cfg/system/profile.d/user.sh
+source "$repo_dir"/cfg/user/profile
 
-source "$repo_dir"/colors/env
+source "$repo_dir"/cfg/user/colors/env
 PREFIX="$BLUE::$RESET"
 
 # these should already be set by one of the profile files, but might be worth
@@ -50,37 +50,37 @@ cfgs=(
       #firefox/chrome/userChrome.css
       #firefox/chrome/userContent.css
 
-      "global/pacman.conf:/etc/pacman.conf"
-      "global/profile.d/user.sh:/etc/profile.d/user.sh"
-      "global/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
+      "cfg/system/pacman.conf:/etc/pacman.conf"
+      "cfg/system/profile.d/user.sh:/etc/profile.d/user.sh"
+      "cfg/system/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
 
-      "colors/env:$ZDOTDIR/colorsenv"
-      "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
-      "fehbg:$XDG_CONFIG_HOME/fehbg"
-      #"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
-      "git/config:$XDG_CONFIG_HOME/git/config"
-      "htoprc:$XDG_CONFIG_HOME/htop/htoprc"
-      "inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
-      "mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
-      "mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
-      "ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
-      "ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
-      "ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
-      "profile:$HOME/.profile"                                       # TODO: make xdg-compliant
-      "redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
-      "tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
-      "user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
-      "vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
-      "vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
-      "vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
-      "nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
-      "X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
-      "X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
-      "X11/xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
-      "X11/xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
-      "X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
-      "zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
-      "zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
+      "cfg/user/colors/env:$ZDOTDIR/colorsenv"
+      "cfg/user/dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
+      "cfg/user/fehbg:$XDG_CONFIG_HOME/fehbg"
+      #cfg/user/"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+      "cfg/user/git/config:$XDG_CONFIG_HOME/git/config"
+      "cfg/user/htoprc:$XDG_CONFIG_HOME/htop/htoprc"
+      "cfg/user/inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
+      "cfg/user/mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
+      "cfg/user/mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
+      "cfg/user/ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
+      "cfg/user/ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
+      "cfg/user/ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
+      "cfg/user/profile:$HOME/.profile"                                       # TODO: make xdg-compliant
+      "cfg/user/redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
+      "cfg/user/tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
+      "cfg/user/user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
+      "cfg/user/vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+      "cfg/user/vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
+      "cfg/user/vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
+      "cfg/user/nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
+      "cfg/user/X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+      "cfg/user/X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+      "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
+      "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
+      "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
+      "cfg/user/zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
+      "cfg/user/zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
 
       "bin/xstat:$HOME/bin/xstat"
     )
