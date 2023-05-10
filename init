@@ -52,6 +52,7 @@ cfgs=(
 
       "global/pacman.conf:/etc/pacman.conf"
       "global/profile:/etc/profile.d/user.sh"
+      "global/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
 
       "colors/env:$ZDOTDIR/colorsenv"
       "dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
