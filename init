@@ -5,7 +5,7 @@
 # Usage:
 # * TODO - install packages
 # * TODO - update packages
-# * config - copy or symlink conf files
+# * files - copy or symlink managed files
 # * TODO - set up hosts file
 # * TODO - set up NFS connection in fstab file
 #
@@ -28,65 +28,67 @@ pkgname=voskarch
 state_dir="$XDG_STATE_HOME/$pkgname"
 data_dir="$XDG_DATA_HOME/$pkgname"
 
-# directory for backing up config files before overwriting
-cfg_backup_dir="$state_dir/cfg/backup"
-# file for keeping track of configs managed by script
-cfg_state="$state_dir/cfg/managed"
-# list of cfgs `src:dst` (potentially) managed by script
-cfgs=(
-      # TODO: add support for destination being a directory rather than filename
-      # TODO: add support for * operator
+# directory for backing up files before overwriting
+file_backup_dir="$state_dir/files/backup"
+# file for keeping track of files managed by script
+file_state="$state_dir/files/managed"
+# list of files `src:dst` (potentially) managed by script
+# TODO: add support for destination being a directory rather than filename
+# TODO: add support for * operator
+system_cfgs=(
+             "cfg/system/pacman.conf:/etc/pacman.conf"
+             "cfg/system/profile.d/user.sh:/etc/profile.d/user.sh"
+             "cfg/system/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
+           )
 
-      #dwb/
-      #dwb/searchengines
-      #dwb/settings
-      #dwm/
-      #dwm/dwm-diff.sh
-      #dwm/dwm-grid-6.1.diff
-      #dwm/dwm-svarog-6.1.diff
-      #dwm/PKGBUILD
-      #firefox/
-      #firefox/chrome/
-      #firefox/chrome/userChrome.css
-      #firefox/chrome/userContent.css
+user_cfgs=(
+           "cfg/user/colors/env:$ZDOTDIR/colorsenv"
+           "cfg/user/dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
+           "cfg/user/fehbg:$XDG_CONFIG_HOME/fehbg"
+           "cfg/user/git/config:$XDG_CONFIG_HOME/git/config"
+           "cfg/user/htoprc:$XDG_CONFIG_HOME/htop/htoprc"
+           "cfg/user/inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
+           "cfg/user/mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
+           "cfg/user/mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
+           "cfg/user/ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
+           "cfg/user/ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
+           "cfg/user/ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
+           "cfg/user/profile:$HOME/.profile"                                       # TODO: make xdg-compliant
+           "cfg/user/redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
+           "cfg/user/tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
+           "cfg/user/user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
+           "cfg/user/vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
+           "cfg/user/vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
+           "cfg/user/vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
+           "cfg/user/nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
+           "cfg/user/X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
+           "cfg/user/X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
+           "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                           # TODO: make xdg-compliant
+           "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                   # TODO: make xdg-compliant
+           "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
+           "cfg/user/zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
+           "cfg/user/zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
 
-      "cfg/system/pacman.conf:/etc/pacman.conf"
-      "cfg/system/profile.d/user.sh:/etc/profile.d/user.sh"
-      "cfg/system/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
-
-      "cfg/user/colors/env:$ZDOTDIR/colorsenv"
-      "cfg/user/dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
-      "cfg/user/fehbg:$XDG_CONFIG_HOME/fehbg"
-      #cfg/user/"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
-      "cfg/user/git/config:$XDG_CONFIG_HOME/git/config"
-      "cfg/user/htoprc:$XDG_CONFIG_HOME/htop/htoprc"
-      "cfg/user/inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant
-      "cfg/user/mpd.conf:$XDG_CONFIG_HOME/mpd/mpd.conf"
-      "cfg/user/mpv.conf:$XDG_CONFIG_HOME/mpv/mpv.conf"
-      "cfg/user/ncmpcpp/bindings:$XDG_CONFIG_HOME/ncmpcpp/bindings"
-      "cfg/user/ncmpcpp/config:$XDG_CONFIG_HOME/ncmpcpp/config"
-      "cfg/user/ncmpcpp/patterns.list:$XDG_CONFIG_HOME/ncmpcpp/patterns.list"
-      "cfg/user/profile:$HOME/.profile"                                       # TODO: make xdg-compliant
-      "cfg/user/redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
-      "cfg/user/tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
-      "cfg/user/user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
-      "cfg/user/vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
-      "cfg/user/vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
-      "cfg/user/vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
-      "cfg/user/nvim/init.vim:$XDG_CONFIG_HOME/nvim/init.vim"
-      "cfg/user/X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
-      "cfg/user/X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
-      "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                               # TODO: make xdg-compliant
-      "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                       # TODO: make xdg-compliant
-      "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
-      "cfg/user/zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
-      "cfg/user/zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
-
+           #cfg/user/"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+           #dwb/
+           #dwb/searchengines
+           #dwb/settings
+           #dwm/
+           #dwm/dwm-diff.sh
+           #dwm/dwm-grid-6.1.diff
+           #dwm/dwm-svarog-6.1.diff
+           #dwm/PKGBUILD
+           #firefox/
+           #firefox/chrome/
+           #firefox/chrome/userChrome.css
+           #firefox/chrome/userContent.css
+         )
+bins=(
       "bin/xstat:$HOME/bin/xstat"
     )
 
 prereq () {
-  mkdir -p "$cfg_backup_dir"
+  mkdir -p "$file_backup_dir"
 
   source "$XDG_CONFIG_HOME"/user-dirs.dirs
   # TODO: this might be doable with xdg-user-dirs-update, unclear
@@ -334,64 +336,70 @@ request_root () {
   eval $__rootvar="'$__root'"
 }
 
-config () {
+files () {
   # Always include `local OPTIND` in any function that uses `getopts` otherwise
   #   all `getopts` share a single global OPTIND
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
   local OPTIND opt
+  local managed_files=()
   local prmpt list clean copy force verbose=false
-  while getopts ":plcxfv" opt; do
-    case $opt in
-      p) prmpt=true ;;
-      l) list=true ;;
-      c) clean=true ;;
-      x) copy=true ;;
-      f) force=true ;;
-      v) verbose=true ;;
-      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
-    esac
+  while [ $OPTIND -le "$#" ]; do
+    if getopts :plcxfv opt; then
+      case $opt in
+        p) prmpt=true ;;
+        l) list=true ;;
+        c) clean=true ;;
+        x) copy=true ;;
+        f) force=true ;;
+        v) verbose=true ;;
+        \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+      esac
+    elif [ -n "${(P)OPTIND}" ]; then
+      managed_files+=($(eval print $"${(P)OPTIND}"))
+      ((OPTIND++))
+    fi
   done
 
   local root sudo
 
   if [ "$list" = true ]; then
     print "$PREFIX Files managed by $pkgname $0:"
-    [ -f "$cfg_state" ] && cat "$cfg_state"
+    [ -f "$file_state" ] && cat "$file_state"
     return
   fi
 
   if [ "$clean" = true ]; then
     print "$PREFIX Removing files managed by $pkgname $0:"
-    if [ -f "$cfg_state" ]; then
+    if [ -f "$file_state" ]; then
       local tmp="$(mktemp)"
-      local existing_cfgs=("${(@f)$(< "$cfg_state")}")
+      local existing_files=("${(@f)$(< "$file_state")}")
 
-      for (( i=1 ; i<=${#existing_cfgs[@]} ; i++ )); do
-        cfg="$existing_cfgs[$i]"
-        printf "(%d/%d) %s\n" "$i" "${#existing_cfgs[@]}" "$cfg"
+      for (( i=1 ; i<=${#existing_files[@]} ; i++ )); do
+        f="$existing_files[$i]"
+        printf "(%d/%d) %s\n" "$i" "${#existing_files[@]}" "$f"
 
         vprint $verbose "$PREFIX Backing up file before removing"
-        veval $verbose cp -u --backup=numbered --parents \"$cfg\" \"$cfg_backup_dir\"
+        veval $verbose cp -u --backup=numbered --parents \"$f\" \"$file_backup_dir\"
 
         sudo= # reset in case set by previous iterations
-        if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
+        if [ ! -w "$f" ] || { [ -h "$f" ] && [ ! -w "$(dirname "$f")" ] }; then
           request_root root "$PREFIX Missing write access for file, continue as root?"
           [ "$root" = true ] && sudo="sudo -E" || {
             print "$PREFIX Root access required, skipping..."
-            vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in config state file"
-            veval $verbose print \"$cfg\" ">>" \"$tmp\"
+            vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in state file"
+            veval $verbose print \"$f\" ">>" \"$tmp\"
             continue
           }
         fi
-        vprint $verbose "$PREFIX Removing config$([ -n "$sudo" ] && print " as root")"
-        veval $verbose $sudo rm \"$cfg\" || {
-          print "$PREFIX Could not remove config"
-          vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in config state file"
-          veval $verbose print \"$cfg\" ">>" \"$tmp\"
+        vprint $verbose "$PREFIX Removing file$([ -n "$sudo" ] && print " as root")"
+        veval $verbose $sudo rm \"$f\" || {
+          print "$PREFIX Could not remove file"
+          vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in state file"
+          veval $verbose print \"$f\" ">>" \"$tmp\"
         }
       done
-      vprint $verbose "$PREFIX Replacing config state file with temporary file"
-      veval $verbose mv \"$tmp\" \"$cfg_state\"
+      vprint $verbose "$PREFIX Replacing state file with temporary file"
+      veval $verbose mv \"$tmp\" \"$file_state\"
     fi
     exit
   fi
@@ -406,10 +414,10 @@ config () {
   [ "$force" = true ] && vprint $verbose "$PREFIX Overwriting existing files with -f"
 
   local src dst d filetype overwrite
-  for (( i=1 ; i<=${#cfgs[@]} ; i++ )); do
-    src="$(realpath -ms "$repo_dir/${cfgs[$i]%%:*}")"
-    dst="$(realpath -ms "${cfgs[$i]#*:}")"
-    printf "(%d/%d) %s -> %s\n" "$i" "${#cfgs[@]}" "$src" "$dst"
+  for (( i=1 ; i<=${#managed_files[@]} ; i++ )); do
+    src="$(realpath -ms "$repo_dir/${managed_files[$i]%%:*}")"
+    dst="$(realpath -ms "${managed_files[$i]#*:}")"
+    printf "(%d/%d) %s -> %s\n" "$i" "${#managed_files[@]}" "$src" "$dst"
 
     [ -h "$dst" ] && filetype="symlink" ||
       { [ -d "$dst" ] && filetype="directory" } ||
@@ -423,8 +431,8 @@ config () {
           msg="Destination and source are identical" } } &&
       { [ "$force" = true ] && vprint $verbose "$PREFIX $msg, overwriting anyway with -f" ||
         { vprint $verbose "$msg, skipping" &&
-          vprint $verbose "$PREFIX Adding to config state file" &&
-          veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
+          vprint $verbose "$PREFIX Adding to state file" &&
+          veval $verbose print \"$dst\" ">>" \"$file_state\" &&
           continue } }
 
     [ "$prmpt" = true ] &&
@@ -460,10 +468,10 @@ config () {
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
       if [ -e "$dst" ]; then
-        cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
+        cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$file_backup_dir\""
         vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
         veval $verbose $cmd &&
-          vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
+          vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$file_backup_dir/$dst")" ||
           { [ "$force" = true ] &&
               vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
               while true; do
@@ -507,8 +515,8 @@ config () {
       $( [ "$overwrite" = true ] && echo "-f") \
       $( [ "$copy" = true ] || echo "-s") \
       $( [ "$verbose" = true ] || echo "2>/dev/null")" &&
-      { vprint $verbose "$PREFIX Adding to config state file" &&
-        veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
+      { vprint $verbose "$PREFIX Adding to state file" &&
+        veval $verbose print \"$dst\" ">>" \"$file_state\" &&
         [ "$copy" = true ] &&
         vprint $verbose "$PREFIX Copied file" ||
         vprint $verbose "$PREFIX Created symbolic link" } ||
@@ -516,7 +524,7 @@ config () {
         print "$PREFIX Could not copy file" ||
         print "$PREFIX Could not create symbolic link" }
   done
-  [ -f "$cfg_state" ] && sort -u "$cfg_state" -o "$cfg_state"
+  [ -f "$file_state" ] && sort -u "$file_state" -o "$file_state"
 }
 
 hosts() {
@@ -536,7 +544,7 @@ case $initcmd in
   backup) backup "${@:2}" ;;
   update) update "${@:2}" ;;
   restore) restore "${@:2}" ;;
-  config) config "${@:2}" ;;
+  files) files bins system_cfgs user_cfgs "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
   *) echo "Invalid command $initcmd" >&2
