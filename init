@@ -459,25 +459,27 @@ config () {
 
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
-      cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
-      vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
-      veval $verbose $cmd &&
-        vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
-        { [ "$force" = true ] &&
-            vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
-            while true; do
-              printf "$PREFIX Failed to back up $filetype, overwrite anyway? (y/N) "
-              read yn
-              case $yn in
-                [Yy]|Yes|yes )
-                  break ;;
-                [Nn]|No|no|"" )
-                  print "$PREFIX Skipping..."
-                  continue 2 ;;
-                * ) ;;
-              esac
-            done }
-      overwrite=true
+      if [ -e "$dst" ]; then
+        cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$cfg_backup_dir\""
+        vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
+        veval $verbose $cmd &&
+          vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$cfg_backup_dir/$dst")" ||
+          { [ "$force" = true ] &&
+              vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
+              while true; do
+                printf "$PREFIX Failed to back up $filetype, overwrite anyway? (y/N) "
+                read yn
+                case $yn in
+                  [Yy]|Yes|yes )
+                    break ;;
+                  [Nn]|No|no|"" )
+                    print "$PREFIX Skipping..."
+                    continue 2 ;;
+                  * ) ;;
+                esac
+              done }
+        overwrite=true
+      fi
     fi
 
     # find last element of path that already exists
