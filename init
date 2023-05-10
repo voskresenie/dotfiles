@@ -86,6 +86,10 @@ user_cfgs=(
 bins=(
       "bin/xstat:$HOME/bin/xstat"
     )
+# intel gpu-specific cfgs
+intel_gpu_cfgs=(
+                "cfg/system/xorg.conf.d/20-intel-gpu.conf:/etc/X11/xorg.conf.d/20-intel-gpu.conf"
+              )
 
 prereq () {
   mkdir -p "$file_backup_dir"
