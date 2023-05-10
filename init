@@ -220,7 +220,7 @@ update () {
               #'Updating package keys:sudo pacman-key --refresh-keys::'
               #'Updating package keys:sudo pacman-key --updatedb::'
               'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman --color always -S archlinux-keyring 1>/dev/null:'
-              'Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su 1>/dev/null 2>/dev/null:'
+              "Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su $( [ "$verbose" = true ] || echo "1>/dev/null 2>/dev/null"):"
               'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
               'Checking for orphaned dependencies:orphan-deps:orphan-deps -q:orphan-deps -v'
               'Updating abs:abs:false:'
@@ -504,7 +504,7 @@ config () {
       $( [ -h "$dst" ] && echo "--remove-destination") \
       $( [ "$overwrite" = true ] && echo "-f") \
       $( [ "$copy" = true ] || echo "-s") \
-      2>/dev/null" &&
+      $( [ "$verbose" = true ] || echo "2>/dev/null")" &&
       { vprint $verbose "$PREFIX Adding to config state file" &&
         veval $verbose print \"$dst\" ">>" \"$cfg_state\" &&
         [ "$copy" = true ] &&
