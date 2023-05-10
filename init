@@ -376,7 +376,7 @@ config () {
         sudo= # reset in case set by previous iterations
         if [ ! -w "$cfg" ] || { [ -h "$cfg" ] && [ ! -w "$(dirname "$cfg")" ] }; then
           request_root root "$PREFIX Missing write access for file, continue as root?"
-          [ "$root" = true ] && sudo="sudo -E " || {
+          [ "$root" = true ] && sudo="sudo -E" || {
             print "$PREFIX Root access required, skipping..."
             vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in config state file"
             veval $verbose print \"$cfg\" ">>" \"$tmp\"
@@ -500,7 +500,7 @@ config () {
 
     vprint $verbose "$PREFIX Making missing directories in path"
     veval $verbose $sudo mkdir -p \"$(dirname "$dst")\"
-    veval $verbose "${sudo}cp \"$src\" \"$dst\" \
+    veval $verbose "$sudo cp \"$src\" \"$dst\" \
       $( [ -h "$dst" ] && echo "--remove-destination") \
       $( [ "$overwrite" = true ] && echo "-f") \
       $( [ "$copy" = true ] || echo "-s") \
