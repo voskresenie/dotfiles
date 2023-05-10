@@ -527,23 +527,6 @@ fstab() {
   echo "fstab not implemented" >&2
 }
 
-# args=()
-# opts=()
-# while [ $OPTIND -le "$#" ]; do
-#   if getopts b: opt; then
-#     case $opt in
-#       b) opts+=("$OPTARG");;
-#     esac
-#   else
-#     args+=("${(P)OPTIND}")
-#     # args+=("${!OPTIND}") -- bash
-#     ((OPTIND++))
-#   fi
-# done
-#
-# echo "${args[@]}"
-# echo "${opts[@]}"
-
 readonly initcmd=${1:?"The command must be specified."}
 prereq
 case $initcmd in

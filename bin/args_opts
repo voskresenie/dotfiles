@@ -1,0 +1,30 @@
+#!/usr/bin/zsh
+
+# example:
+#   $ args_opts arg1 -o opt1 -o opt2 arg2 arg3 -o opt3
+#   arguments: arg1 arg2 arg3
+#   options: opt1 opt2 opt3
+fn() {
+  script_args=()
+  script_opts=()
+  
+  # Always include `local OPTIND` in any function that uses `getopts` otherwise all `getopts` share a single global OPTIND
+  # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
+  local OPTIND opt
+  
+  while [ $OPTIND -le "$#" ]; do
+    if getopts o: opt; then
+      case $opt in
+        o) script_opts+=("$OPTARG");;
+      esac
+    else
+      script_args+=("${(P)OPTIND}")
+      # script_args+=("${!OPTIND}") -- bash
+      ((OPTIND++))
+    fi
+  done
+  
+  echo "arguments: ${script_args[@]}"
+  echo "options: ${script_opts[@]}"
+}
+fn "${@:1}"
