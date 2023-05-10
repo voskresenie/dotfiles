@@ -442,7 +442,7 @@ config () {
       done
 
     overwrite= # reset in case set by previous iterations
-    if [ -e "$dst" ]; then
+    if [ -e "$dst" ] || [ -h "$dst" ]; then
       [ ! "$force" = true ] &&
         while true; do
           printf "$PREFIX Destination $filetype $(basename "$dst") exists, overwrite? (y/N) "
