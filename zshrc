@@ -51,6 +51,11 @@ alias red='redshift'
 alias showdrivers='lspci -v'
 alias syncclock='sudo ntpd -qg && sudo hwclock --systohc'
 alias swapesc='setxkbmap -option caps:swapescape'
+findsyms () {
+  readonly local f="$1"
+  readonly local d="$2"
+  find -L $d -samefile $f 2&>/dev/null
+}
 
 # packages
 pacman-cheatsheet () {
