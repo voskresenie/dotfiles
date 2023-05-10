@@ -234,6 +234,7 @@ update () {
               'Updating mlocate db:sudo updatedb::'
               'Updating vundle:nvim +BundleUpdate +q +q::'
               'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
+              # swap escape seems to get messed up sometimes after update, consider running it here
               )
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
     parts=("${(@s[:])cmds[$i]}")
@@ -539,9 +540,9 @@ fstab() {
   echo "fstab not implemented" >&2
 }
 
-readonly initcmd=${1:?"The command must be specified."}
+readonly cmd=${1:?"The command must be specified."}
 prereq
-case $initcmd in
+case $cmd in
   init) init "${@:2}" ;;
   install) install "${@:2}" ;;
   abs) abs "${@:2}" ;;
@@ -551,6 +552,6 @@ case $initcmd in
   files) files bins system_cfgs user_cfgs "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
-  *) echo "Invalid command $initcmd" >&2
+  *) echo "Invalid command $cmd" >&2
     exit 1
 esac
