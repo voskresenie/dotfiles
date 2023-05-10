@@ -12,7 +12,7 @@
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
 repo_dir="$(realpath "$(dirname "$0")")"
-source "$repo_dir"/global/profile
+source "$repo_dir"/global/profile.d/user.sh
 source "$repo_dir"/profile
 
 source "$repo_dir"/colors/env
@@ -51,7 +51,7 @@ cfgs=(
       #firefox/chrome/userContent.css
 
       "global/pacman.conf:/etc/pacman.conf"
-      "global/profile:/etc/profile.d/user.sh"
+      "global/profile.d/user.sh:/etc/profile.d/user.sh"
       "global/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
 
       "colors/env:$ZDOTDIR/colorsenv"
