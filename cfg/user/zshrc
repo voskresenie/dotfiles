@@ -136,15 +136,22 @@ alias ls='ls -h --color=auto -N'
 alias which='which -a'
 
 alias copy='xsel -i'
-alias diff='diff -aur --color'
+# diff
+#   -a  treat all files as text
+#   -u  output context
+#   -r  recursively compare subdirectories
+alias diff='diff -aur --color=always'
 
 alias font++="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=20:antialias=true:hinting=true\""
 alias font+="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=16:antialias=true:hinting=true\""
 alias font="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=12:antialias=true:hinting=true\""
 alias font-="printf '\33]50;%s\007' \"xft:Inconsolata LGC:style=Bold:pixelsize=10:antialias=true:hinting=true\""
 
+# colored less output
+export LESS='-R --use-color'
 # Colored man pages: http://linuxtidbits.wordpress.com/2009/03/23/less-colors-for-man-pages/
 # Less Colors for Man Pages
+# TODO: this might not do anything
 export LESS_TERMCAP_mb=$'\E[01;31m'       # begin blinking
 export LESS_TERMCAP_md=$'\E[01;38;5;74m'  # begin bold
 export LESS_TERMCAP_me=$'\E[0m'           # end mode
