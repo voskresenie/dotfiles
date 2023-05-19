@@ -1,0 +1,4 @@
+#
+# $ZDOTDIR/.zlogout
+#
+listop prepend PROFILES ${(%):-%x}

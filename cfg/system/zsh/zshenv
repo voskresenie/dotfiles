@@ -1,0 +1,77 @@
+#
+# /etc/zsh/zshenv
+#
+source /usr/local/bin/listop
+listop prepend PROFILES ${(%):-%x}
+export PROFILES
+
+# The XDG Base Directory Specification is based on the following concepts:
+#   * There is a single base directory relative to which user-specific data
+#     files should be written. This directory is defined by the environment
+#     variable $XDG_DATA_HOME.
+test $XDG_DATA_HOME || export XDG_DATA_HOME="$HOME/.local/share"
+#   * There is a single base directory relative to which user-specific
+#     configuration files should be written. This directory is defined by the
+#     environment variable $XDG_CONFIG_HOME.
+test $XDG_CONFIG_HOME || export XDG_CONFIG_HOME="$HOME/.config"
+#   * There is a single base directory relative to which user-specific state
+#     data should be written. This directory is defined by the environment
+#     variable $XDG_STATE_HOME.
+test $XDG_STATE_HOME || export XDG_STATE_HOME="$HOME/.local/state"
+#   * There is a single base directory relative to which user-specific
+#     executable files should be written. This directory is defined by the
+#     environment variable $XDG_BIN_HOME.
+test $XDG_BIN_HOME || export XDG_BIN_HOME="$HOME/.local/bin"
+#   * There is a single base directory relative to which user-specific
+#     architecture-independent library files shoule be written. This directory
+#     is defined by the environment variable $XDG_LIB_HOME.
+test $XDG_LIB_HOME || export XDG_LIB_HOME="$HOME/.local/lib"
+#   * There is a set of preference ordered base directories relative to which
+#     executable files should be searched. This set of directories is defined by
+#     the environment variable $XDG_BIN_DIRS.
+test $XDG_BIN_DIRS || export XDG_BIN_DIRS="/usr/local/bin:/usr/bin"
+#   * There is a set of preference ordered base directories relative to which
+#     library files should be searched. This set of directories is defined by
+#     the environment variable $XDG_LIB_DIRS.
+test $XDG_LIB_DIRS || export XDG_LIB_DIRS="/usr/local/lib:/usr/lib"
+#   * There is a set of preference ordered base directories relative to which
+#     data files should be searched. This set of directories is defined by the
+#     environment variable $XDG_DATA_DIRS.
+test $XDG_DATA_DIRS || export XDG_DATA_DIRS="/usr/local/share:/usr/share"
+#   * There is a set of preference ordered base directories relative to which
+#     configuration files should be searched. This set of directories is defined
+#     by the environment variable $XDG_CONFIG_DIRS.
+test $XDG_CONFIG_DIRS || export XDG_CONFIG_DIRS="/etc/xdg"
+#   * There is a single base directory relative to which user-specific
+#     non-essential (cached) data should be written. This directory is defined
+#     by the environment variable $XDG_CACHE_HOME.
+test $XDG_CACHE_HOME || export XDG_CACHE_HOME="$HOME/.cache"
+#   * There is a single base directory relative to which user-specific runtime
+#     files and other file objects should be placed. This directory is defined
+#     by the environment variable $XDG_RUNTIME_DIR.
+test $XDG_RUNTIME_DIR || echo "XDG_RUNTIME_DIR not set by pam_systemd(8)"
+# Source: https://theos.kyriasis.com/~kyrias/basedir-spec.html
+#         http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+
+# XDG user directories
+# Source: https://wiki.archlinux.org/title/XDG_user_directories
+test $XDG_DESKTOP_DIR || export XDG_DESKTOP_DIR="$HOME/desktop"
+test $XDG_DOWNLOAD_DIR || export XDG_DOWNLOAD_DIR="$HOME/dl"
+test $XDG_TEMPLATES_DIR || export XDG_TEMPLATES_DIR="$HOME/templates"
+test $XDG_PUBLICSHARE_DIR || export XDG_PUBLICSHARE_DIR="$HOME/public"
+test $XDG_DOCUMENTS_DIR || export XDG_DOCUMENTS_DIR="$HOME/docs"
+test $XDG_MUSIC_DIR || export XDG_MUSIC_DIR="$HOME/music"
+test $XDG_PICTURES_DIR || export XDG_PICTURES_DIR="$HOME/pics"
+test $XDG_VIDEOS_DIR || export XDG_VIDEOS_DIR="$HOME/video"
+
+# z-dirs
+export ZDOTDIR=$XDG_CONFIG_HOME/zsh
+export ZCACHEDIR=$XDG_CACHE_HOME/zsh
+export ZDATADIR=$XDG_DATA_HOME/zsh
+export ZSTATEDIR=$XDG_STATE_HOME/zsh
+
+listop prepend PATH $HOME/bin
+
+export PS1='@%m %1~ $ '
+export EDITOR=nvim
+export PAGER=less

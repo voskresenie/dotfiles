@@ -1,0 +1,4 @@
+#
+# /etc/zsh/zlogout
+#
+listop prepend PROFILES ${(%):-%x}

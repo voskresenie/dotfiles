@@ -45,6 +45,10 @@ system_cfgs=(
              "cfg/system/pacman.conf:/etc/pacman.conf"
              "cfg/system/profile.d/user.sh:/etc/profile.d/user.sh"
              "cfg/system/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
+             "cfg/system/zsh/zlogout:/etc/zsh/zlogout"
+             "cfg/system/zsh/zprofile:/etc/zsh/zprofile"
+             "cfg/system/zsh/zshenv:/etc/zsh/zshenv"
+             "cfg/system/zsh/zshrc:/etc/zsh/zshrc"
            )
 
 user_bins=(
@@ -66,7 +70,6 @@ user_cfgs=(
            "cfg/user/profile:$HOME/.profile"                                       # TODO: make xdg-compliant
            "cfg/user/redshift.conf:$XDG_CONFIG_HOME/redshift.conf"
            "cfg/user/tmux.conf:$XDG_CONFIG_HOME/tmux/tmux.conf"
-           "cfg/user/user-dirs.dirs:$XDG_CONFIG_HOME/user-dirs.dirs"
            "cfg/user/vim/vimrc:$XDG_CONFIG_HOME/vim/vimrc"
            "cfg/user/vim/colors.vim:$XDG_CONFIG_HOME/vim/colors/voskarch.vim"
            "cfg/user/vim/colors.airline.vim:$XDG_CONFIG_HOME/vim/autoload/airline/themes/voskarch.vim"
@@ -76,8 +79,11 @@ user_cfgs=(
            "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                           # TODO: make xdg-compliant
            "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                   # TODO: make xdg-compliant
            "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
-           "cfg/user/zprofile:$HOME/.zprofile"                                     # TODO: make xdg-compliant
-           "cfg/user/zshrc:$ZDOTDIR/.zshrc"                                        # TODO: see if it's possible to make it zshrc not .zshrc
+           "cfg/user/zsh/zlogin:$ZDOTDIR/.zlogin"                                  # TODO: see if it's possible to remove preceding dot
+           "cfg/user/zsh/zlogout:$ZDOTDIR/.zlogout"                                # TODO: see if it's possible to remove preceding dot
+           "cfg/user/zsh/zprofile:$ZDOTDIR/.zprofile"                              # TODO: see if it's possible to remove preceding dot
+           "cfg/user/zsh/zshenv:$ZDOTDIR/.zshenv"                                  # TODO: see if it's possible to remove preceding dot
+           "cfg/user/zsh/zshrc:$ZDOTDIR/.zshrc"                                    # TODO: see if it's possible to remove preceding dot
 
            #cfg/user/"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
            #dwb/
@@ -101,8 +107,6 @@ intel_gpu_cfgs=(
 prereq () {
   mkdir -p "$file_backup_dir"
 
-  source "$XDG_CONFIG_HOME"/user-dirs.dirs
-  # TODO: this might be doable with xdg-user-dirs-update, unclear
   mkdir -p "$XDG_DESKTOP_DIR" \
     "$XDG_DOWNLOAD_DIR" \
     "$XDG_TEMPLATES_DIR" \
@@ -425,6 +429,7 @@ files () {
   [ "$copy" = true ] && vprint $verbose "$PREFIX Copying files..." || vprint $verbose "$PREFIX Linking files..."
   [ "$force" = true ] && vprint $verbose "$PREFIX Overwriting existing files with -f"
 
+  # TODO: clean up old files from $file_state
   local src dst d filetype overwrite
   for (( i=1 ; i<=${#managed_files[@]} ; i++ )); do
     src="$(realpath -ms "$repo_dir/${managed_files[$i]%%:*}")"

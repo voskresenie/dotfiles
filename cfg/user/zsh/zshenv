@@ -1,0 +1,9 @@
+#
+# $ZDOTDIR/.zshenv
+#
+listop prepend PROFILES ${(%):-%x}
+
+export GOPATH=$HOME
+# export PATH=$GOPATH/bin:$PATH
+
+export STEAM_RUNTIME=0

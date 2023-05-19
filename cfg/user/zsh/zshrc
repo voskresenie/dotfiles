@@ -6,7 +6,9 @@
 #
 # Lines configured by zsh-newuser-install
 # shell history
-HISTFILE=~/.histfile
+listop prepend PROFILES ${(%):-%x}
+
+HISTFILE=$ZSTATEDIR/history
 HISTSIZE=1000
 SAVEHIST=100000
 setopt inc_append_history
@@ -29,7 +31,7 @@ zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'r:|[._-]=* r
 zstyle :compinstall filename '/home/david/.zshrc'
 
 autoload -Uz compinit
-compinit
+compinit -d $ZCACHEDIR/zcompdump-$ZSH_VERSION
 # End of lines added by compinstall
 
 alias pw='read -s PASS; echo $PASS | sha256sum | hex2ascii'
@@ -41,7 +43,6 @@ alias vim='nvim'
 
 # code
 alias g=git
-export GOPATH=$HOME
 
 # system
 alias hdmi+='xrandr --output HDMI1 --auto --above eDP1'
@@ -129,7 +130,6 @@ alias .='ls'
 
 source "$ZDOTDIR"/colorsenv
 export PS1="@%m %1~ $ "
-export PATH=$GOPATH/bin:$HOME/bin:$PATH
 source /usr/share/doc/pkgfile/command-not-found.zsh
 
 alias ls='ls -h --color=auto -N'
