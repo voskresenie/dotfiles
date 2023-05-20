@@ -84,6 +84,7 @@ user_cfgs=(
            #firefox/chrome/userContent.css
          )
 bins=(
+      "bin/ensure:$HOME/bin/ensure"
       "bin/xstat:$HOME/bin/xstat"
     )
 # intel gpu-specific cfgs

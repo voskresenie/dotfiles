@@ -1,0 +1,35 @@
+#!/usr/bin/zsh
+#
+# $XDG_BIN_HOME/ensure
+#
+# This script checks whether files and directories exist and will create them
+# if not. If a file exists but is not the requested type, it will print an error.
+#
+# usage: ensure [-f FILE...] [-d DIRECTORY...]
+#
+readonly usage="Usage: $0 [-f FILE...] [-d DIRECTORY...]"
+[ "$#" -eq 0 ] && >&2 print "$0: missing arguments\n$usage" && exit 1
+
+ds=()
+fs=()
+while [ $OPTIND -le "$#" ]; do
+  if getopts df opt; then
+    case $opt in
+      d) arg_type=dir;;
+      f) arg_type=file;;
+    esac
+  else
+    arg="${(P)OPTIND}"
+    if [ "$arg_type" = file ]; then
+      [ -f "$arg" ] || { [ -e "$arg" ] && >&2 print "$arg exists but is not regular file" } || fs+=("$arg")
+    elif [ "$arg_type" = dir ]; then
+      [ -d "$arg" ] || { [ -e "$arg" ] && >&2 print "$arg exists but is not directory" } || ds+=("$arg")
+    else
+      >&2 print "Invalid argument: $arg\n$usage"
+    fi
+    ((OPTIND++))
+  fi
+done
+
+[ -n "$ds" ] && mkdir -p $ds
+[ -n "$fs" ] && touch $fs
