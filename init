@@ -37,6 +37,7 @@ file_state="$state_dir/files/managed"
 # TODO: add support for destination being a directory rather than filename
 # TODO: add support for * operator
 system_bins=(
+             "bin/system/listop:/usr/local/bin/listop"
              "bin/system/ensure:/usr/local/bin/ensure"
            )
 
