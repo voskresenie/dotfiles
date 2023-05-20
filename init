@@ -473,7 +473,7 @@ files () {
       # TODO: figure out how to handle symlinks with copying with backups
       # -- currently copies contents into symlink
       if [ -e "$dst" ]; then
-        cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$file_backup_dir\""
+        local cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$file_backup_dir\""
         vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
         veval $verbose $cmd &&
           vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$file_backup_dir/$dst")" ||
