@@ -12,8 +12,8 @@
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
 repo_dir="$(realpath "$(dirname "$0")")"
-source "$repo_dir"/cfg/system/profile.d/user.sh
-source "$repo_dir"/cfg/user/profile
+source "$repo_dir"/cfg/system/zsh/zshenv
+source "$repo_dir"/cfg/system/zsh/zprofile
 
 source "$repo_dir"/cfg/user/colors/env
 PREFIX="$BLUE::$RESET"
