@@ -248,9 +248,9 @@ update () {
               # swap escape seems to get messed up sometimes after update, consider running it here
               )
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
-    parts=("${(@s[:])cmds[$i]}")
-    desc="$parts[1]"
-    cmd="$parts[2]"
+    local parts=("${(@s[:])cmds[$i]}")
+    local desc="$parts[1]"
+    local cmd="$parts[2]"
     if [ "$quiet" = true ]; then
       [ "$parts[3]" = false ] && print "$PREFIX $desc -- skipping in quiet mode" && continue
       [ -n "$parts[3]" ] && cmd="$parts[3]" || cmd="$cmd 1>/dev/null"
