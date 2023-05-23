@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 #
+# /usr/local/bin/sys
+#
 # This script initializes and maintains a system in a standardized format
 #
 # Usage:
@@ -11,7 +13,8 @@
 #
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
-repo_dir="$(realpath "$(dirname "$0")")"
+script_dir="$(dirname "$(realpath "$0")")"
+repo_dir="$(realpath "$script_dir/../..")"
 source "$repo_dir"/cfg/system/zsh/zshenv
 source "$repo_dir"/cfg/system/zsh/zprofile
 
@@ -37,8 +40,9 @@ file_state="$state_dir/files/managed"
 # TODO: add support for destination being a directory rather than filename
 # TODO: add support for * operator
 system_bins=(
-             "bin/system/listop:/usr/local/bin/listop"
              "bin/system/ensure:/usr/local/bin/ensure"
+             "bin/system/listop:/usr/local/bin/listop"
+             "bin/system/sys:/usr/local/bin/sys"
            )
 
 system_cfgs=(
@@ -122,7 +126,7 @@ prereq () {
     "$XDG_VIDEOS_DIR"
 }
 
-init () {
+sys () {
   if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
     while true; do
       printf "$PREFIX repo located at $repo_dir; move to $data_dir? (y/N) "
