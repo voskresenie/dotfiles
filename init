@@ -104,6 +104,11 @@ intel_gpu_cfgs=(
                 "cfg/system/xorg.conf.d/20-intel-gpu.conf:/etc/X11/xorg.conf.d/20-intel-gpu.conf"
               )
 
+system=( "${system_bins[@]}" "${system_cfgs[@]}" )
+user=( "${user_bins[@]}" "${user_cfgs[@]}" )
+bins=( "${system_bins[@]}" "${user_bins[@]}" )
+cfgs=( "${system_cfgs[@]}" "${user_cfgs[@]}" )
+
 prereq () {
   mkdir -p "$file_backup_dir"
 
@@ -204,7 +209,7 @@ backup () {
 
 orphan-deps () {
   local OPTIND opt
-  local quiet verbose=false
+  local quiet=false verbose=false
   while getopts ":qv" opt; do
     case $opt in
       q) quiet=true ;;
@@ -222,7 +227,7 @@ orphan-deps () {
 
 update () {
   local OPTIND opt
-  local quiet verbose=false
+  local quiet=false verbose=false
   while getopts ":qv" opt; do
     case $opt in
       q) quiet=true ;;
@@ -358,7 +363,7 @@ files () {
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
   local OPTIND opt
   local managed_files=()
-  local prmpt list clean copy force verbose=false
+  local prmpt=false list=false clean=false copy=false force=false verbose=false
   while [ $OPTIND -le "$#" ]; do
     if getopts :plcxfv opt; then
       case $opt in
@@ -561,7 +566,7 @@ case $cmd in
   backup) backup "${@:2}" ;;
   update) update "${@:2}" ;;
   restore) restore "${@:2}" ;;
-  files) files system_bins system_cfgs user_bins user_cfgs "${@:2}" ;;
+  files) files "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
   *) echo "Invalid command $cmd" >&2
