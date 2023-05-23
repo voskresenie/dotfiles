@@ -2,4 +2,4 @@
 # $ZDOTDIR/.zlogin
 #
 listop prepend PROFILES ${(%):-%x}
-exec /usr/bin/startx
+#exec /usr/bin/startx
