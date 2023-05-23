@@ -20,9 +20,9 @@ PREFIX="$BLUE::$RESET"
 
 # these should already be set by one of the profile files, but might be worth
 # keeping around anyway just in case
-XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-~/.config}"
-XDG_STATE_HOME="${XDG_STATE_HOME:-~/.local/state}"
-XDG_DATA_HOME="${XDG_DATA_HOME:-~/.local/share}"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
 pkgname=voskarch
 state_dir="$XDG_STATE_HOME/$pkgname"
