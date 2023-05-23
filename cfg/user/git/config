@@ -21,3 +21,5 @@
 	# or maybe ours = "!git checkout --ours \"$1\" && git add \"$1\";" #"
 	theirs = "!f() { git checkout --theirs \"$1\" && git add \"$1\"; }; f"
 	graph = log --oneline --graph --decorate
+[pager]
+	branch = false
