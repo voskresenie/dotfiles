@@ -405,7 +405,7 @@ request_root () {
   eval local __root=$"$__rootvar"
   local msg=$2
   while [ -z "$__root" ]; do
-    printf "$PREFIX Build package $pkg? [%]es [n]o "
+    printf "$PREFIX $msg? [%]es [n]o "
     read yn
     case $yn in
       [Yy]|Yes|yes|"" )
@@ -469,7 +469,7 @@ files () {
 
         sudo= # reset in case set by previous iterations
         if [ ! -w "$f" ] || { [ -h "$f" ] && [ ! -w "$(dirname "$f")" ] }; then
-          request_root root "$PREFIX Missing write access for file, continue as root?"
+          request_root root "Missing write access for file, continue as root?"
           [ "$root" = true ] && sudo="sudo -E" || {
             print "$PREFIX Root access required, skipping..."
             vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in state file"
@@ -595,7 +595,7 @@ files () {
 
     sudo= # reset in case set by previous iterations
     if [ ! -w "$d" ]; then
-      request_root root "$PREFIX Missing write access for destination $d, continue as root?"
+      request_root root "Missing write access for destination $d, continue as root?"
       [ "$root" = true ] && sudo="sudo -E" ||
           { print "$PREFIX Root access required, skipping..." && continue }
     fi
