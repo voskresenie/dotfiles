@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+# nfs - network filesystem
+#
+# usage: sudo ./nfs
+#
+# TODO: other nfs setup
+echo valhalla:/srv/nfs/media /mnt/media nfs rw,rsize=8192,wsize=8192,timeo=14,_netdev 0 0 >> /etc/fstab
