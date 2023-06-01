@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+# swap
+#
+# usage: sudo ./swap
+#
+# source: https://wiki.archlinux.org/title/swap
+# apparently there's no need to enable systemd-swap
+#
+swapfile=/var/swap/swapfile01_8G
+chmod 0600 /var/swap/swapfile01_8&
+dd if=/dev/zero of="$swapfile" count=8k status=progress
+chmod 0600 "$swapfile"
+mkswap -U clear "$swapfile"
+echo "$swapfile" none swap defaults 0 0 >> /etc/fstab
