@@ -86,10 +86,12 @@ alias initpkgsums='makepkg -g >> PKGBUILD'
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias vlastscreen='feh "$(ls ~/ss/*.png | tail -n 1)"'
 alias screenfetch='screenfetch -c 04,13'
-alias scrot='scrot ~/ss/%Y-%m-%d-%H%M%S.png'
+alias scrot='scrot ~/ss/%Y-%m-%dT%H%M%S%z.png'
 screengrab() {
-    ffmpeg -f x11grab -s 2560x1440 -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/grab.mkv
-    ffmpeg -threads 8 -i ~/grab.mkv -crf 10 -b:v 3M ~/grab.webm
+  readonly local filename="$(date +%Y-%m-%dT%H%M%S%z)"
+  readonly local resolution='1920x1080' # '2560x1440'
+  ffmpeg -f x11grab -s $resolution -r 60 -i :0.0 -q:v 0 -vcodec huffyuv ~/ss/${filename}.mkv
+  ffmpeg -threads 8 -i ~/ss/${filename}.mkv -crf 10 -b:v 3M ~/ss/${filename}.webm
 }
 
 # media
