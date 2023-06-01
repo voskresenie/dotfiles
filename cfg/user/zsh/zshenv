@@ -3,7 +3,11 @@
 #
 listop prepend PROFILES ${(%):-%x}
 
-export GOPATH=$HOME
+# go
+export GOPATH=$XDG_DATA_HOME/go
 # export PATH=$GOPATH/bin:$PATH
+# Android SDK
+export ANDROID_HOME=$XDG_DATA_HOME/android/sdk
+export JAVA_HOME=/usr/lib/jvm/default
 
 export STEAM_RUNTIME=0
