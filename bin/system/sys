@@ -14,9 +14,10 @@
 #
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
-pkgname=voskarch
-script_name="$(basename $0)"
-script_dir="$(dirname "$(realpath "$0")")"
+readonly hostname=$(cat /etc/hostname)
+readonly pkgname=voskarch
+readonly script_name="$(basename $0)"
+readonly script_dir="$(dirname "$(realpath "$0")")"
 repo_dir="$(realpath "$script_dir/../..")"
 export PATH=$script_dir:$PATH
 source "$repo_dir"/cfg/system/zsh/zshenv
@@ -132,9 +133,11 @@ prereq () {
 }
 
 init () {
-  readonly local hostname=${1:?"The hostname must be specified."}
+  readonly local usage='TODO'
+
+  readonly local __hostname="${1:-$hostname}"
+  [ -z "$__hostname" ] && echo "Missing hostname" >&2 && exit 1
   readonly local package_groups="${@:2}"
-  local cfg="$(mktemp)"
 
   if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
     while true; do
@@ -154,15 +157,11 @@ init () {
       esac
     done
   fi
-
-  print $hostname > $cfg
-
-  # TODO: back up existing cfg first
-  mv $cfg $config_dir/system
 }
 
 __system () {
   readonly local usage='TODO'
+  local __hostname="$hostname"
 
   local OPTIND opt
   local args=() files_opts update_opts
@@ -179,28 +178,28 @@ __system () {
         \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
       esac
     elif [ -n "${(P)OPTIND}" ]; then
-      [ -z "$hostname" ] && hostname="${(P)OPTIND}" || { echo "Invalid argument: ${(P)OPTIND}" >&2 && exit 1 }
+      [ -z "$hostname_arg" ] && hostname_arg="${(P)OPTIND}" || { echo "Invalid argument: ${(P)OPTIND}" >&2 && exit 1 }
       ((OPTIND++))
     fi
   done
-  [ -z "$hostname" ] && echo "Missing hostname" >&2 && exit 1
+  [ -n "$hostname_arg" ] && __hostname="$hostname_arg"
+  [ -z "$__hostname" ] && echo "Missing hostname" >&2 && exit 1
 
-  # TODO: init $hostname
+  init $__hostname
   declare -A host_file_groups
   host_file_groups=(
-                    #hretha       'system_bins -x system_cfgs user_bins user_cfgs'
                     hretha       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
                     svarog       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
                     valhalla     'system_bins':'-x system_cfgs':'user_bins user_cfgs'
                   )
-  local file_groups=(${(s[:])host_file_groups[$hostname]})
+  local file_groups=(${(s[:])host_file_groups[$__hostname]})
   for file_group in "$file_groups[@]"; do
     file_group=(${(s[ ])file_group})
     print "$PREFIX $script_name files $file_group"
     files $file_group[@] ${files_opts:+-$files_opts}
   done
 
-  #update ${update_opts:+-$update_opts}
+  update ${update_opts:+-$update_opts}
 }
 
 install () {
@@ -315,6 +314,7 @@ update () {
               'Updating vundle:nvim +BundleUpdate +q +q::'
               'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
               # swap escape seems to get messed up sometimes after update, consider running it here
+              'Swapping escape and capslock key:setxkbmap -option caps:swapescape::'
               )
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
     local parts=("${(@s[:])cmds[$i]}")
