@@ -1,0 +1,52 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys
+#
+# This script updates a system
+#
+update () {
+  readonly local usage='TODO'
+  local OPTIND opt
+  local quiet=false verbose=false
+  while getopts ":hqv" opt; do
+    case $opt in
+      h) print "Usage: $usage" && exit ;;
+      q) quiet=true ;;
+      v) verbose=true ;;
+      \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
+    esac
+  done
+
+  # "description:normal command:[quiet command]:[verbose command]"
+  local cmds=(
+              'Updating package database:sudo pacman -Sy::'
+              #'Updating package keys:sudo pacman-key --refresh-keys::'
+              #'Updating package keys:sudo pacman-key --updatedb::'
+              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman --color always -S archlinux-keyring 1>/dev/null:'
+              "Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su $( [ "$verbose" = true ] || echo "1>/dev/null 2>/dev/null"):"
+              'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
+              'Checking for orphaned dependencies:orphan-deps:orphan-deps -q:orphan-deps -v'
+              'Updating abs:abs:false:'
+              'Updating pkgfile:sudo pkgfile -u 1>/dev/null::'
+              'Updating mlocate db:sudo updatedb::'
+              'Updating vundle:nvim +BundleUpdate +q +q::'
+              'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
+              # swap escape seems to get messed up sometimes after update, consider running it here
+              'Swapping escape and capslock key:setxkbmap -option caps:swapescape::'
+              )
+  for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
+    local parts=("${(@s[:])cmds[$i]}")
+    local desc="$parts[1]"
+    local cmd="$parts[2]"
+    if [ "$quiet" = true ]; then
+      [ "$parts[3]" = false ] && print "$PREFIX $desc -- skipping in quiet mode" && continue
+      [ -n "$parts[3]" ] && cmd="$parts[3]" || cmd="$cmd 1>/dev/null"
+    elif [ "$verbose" = true ]; then
+      [ -n "$parts[4]" ] && cmd="$parts[4]"
+    fi
+    print "$PREFIX $desc..."
+    veval $verbose "$cmd" ||
+      { print "$PREFIX Failed to complete update" && return }
+  done
+  print "$PREFIX Successfully updated system"
+}

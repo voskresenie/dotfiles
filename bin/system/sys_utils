@@ -1,0 +1,74 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys
+#
+# This script contains general utils
+#
+## error
+# usage: error MESSAGE
+error () {
+  local __msg="${@:1}"
+  print >&2 "${RED}error:$RESET $__msg"
+}
+
+## warn
+# usage: warn MESSAGE
+warn () {
+  local __msg="${@:1}"
+  print >&2 "${YELLOW}warning:$RESET $__msg"
+}
+
+## verbose print
+# usage: vprint VERBOSE MESSAGE...
+#
+# Usage same as print. VERBOSE param, if taken from a variable, should be quoted
+# if there is a chance it will be null. Evaluates to true even if VERBOSE is
+# false. This makes it simpler to chain together with other commands, eg
+#   command && vprint $v $success_msg || print $failure_msg
+# where the goal is to print a success message only if verbose logging is
+# enabled, but print a failure message whether verbose logging is enabled or
+# not. If vprint evaluated to false when verbose is false, this functionality
+# wouldn't be possible in shorthand except through something gross like
+#  command && { vprint $v $success_msg || true } || print $failure_msg
+# which is the exact sort of use case vprint exists to avoid.
+vprint () {
+  local __verbose="$1"
+  local __msg=${@:2}
+  [ "$__verbose" = true ] && [ -n "$__msg" ] && print $__msg || true
+}
+
+## verbose eval
+# usage: veval VERBOSE? CMD...
+#
+# Usage same as eval (ie command may require escaping). VERBOSE param, if taken
+# from a variable, should be quoted if there is a chance it will be null.
+veval () {
+  local __verbose="$1"
+  local __cmd="${@:2}"
+  if [ "$__verbose" = true ]; then
+    [ -n "$__cmd" ] && print "$__cmd"
+  fi
+  eval $__cmd
+}
+
+## request root
+# usage: request_root MESSAGE?
+request_root () {
+  local __rootvar=${1:?"The root var must be specified."}
+  eval local __root=$"$__rootvar"
+  local msg=$2
+  while [ -z "$__root" ]; do
+    printf "$PREFIX $msg? [%]es [n]o "
+    read yn
+    case $yn in
+      [Yy]|Yes|yes|"" )
+        __root=true
+        break ;;
+      [Nn]|No|no )
+        __root=false
+        break ;;
+      * ) ;;
+    esac
+  done
+  eval $__rootvar="'$__root'"
+}

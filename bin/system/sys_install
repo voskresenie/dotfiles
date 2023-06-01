@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_install
+#
+# This script installs a system in a standardized format
+#
+install () {
+  echo "$script_name $0 not implemented" >&2
+
+  sudo pacman -Syyu
+  pkgs=(pkgfile nano)
+  sudo pacman -S "$pkgs[@]"
+  abs
+
+  # install vundle
+  if [ ! -d "$XDG_DATA_HOME"/vim/bundle/Vundle.vim ]; then
+    git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
+    vim +BundleInstall +q +q
+  fi
+  # powerline font
+  # TODO: add installation of custom font pkg (pkgs/otf-powerline-symbols)
+  # for reference: how this was originally done, in case package doesn't work
+  # wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
+  # wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
+  # mv PowerlineSymbols.otf ~/.local/share/fonts/
+  # fc-cache -vf ~/.local/share/fonts/
+  # mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/
+}

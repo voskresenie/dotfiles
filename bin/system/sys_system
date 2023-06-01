@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_system
+#
+# This script maintains a system in a standardized state
+#
+__system () {
+  readonly local usage='TODO'
+  local __hostname="$hostname"
+
+  local OPTIND opt
+  local args=() files_opts update_opts
+  while [ $OPTIND -le "$#" ]; do
+    if getopts :fhpqv opt; then
+      case $opt in
+        f) files_opts+=$opt ;;
+        h) print "Usage: $usage" && exit ;;
+        p) files_opts+=$opt ;;
+        q) update_opts+=$opt ;;
+        v) files_opts+=$opt
+          update_opts+=$opt
+          ;;
+        \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
+      esac
+    elif [ -n "${(P)OPTIND}" ]; then
+      [ -z "$hostname_arg" ] && hostname_arg="${(P)OPTIND}" || { echo "Invalid argument: ${(P)OPTIND}" >&2 && exit 1 }
+      ((OPTIND++))
+    fi
+  done
+  [ -n "$hostname_arg" ] && __hostname="$hostname_arg"
+  [ -z "$__hostname" ] && echo "Missing hostname" >&2 && exit 1
+
+  init $__hostname
+  declare -A host_file_groups
+  host_file_groups=(
+                    hretha       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                    svarog       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                    valhalla     'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                  )
+  local file_groups=(${(s[:])host_file_groups[$__hostname]})
+  for file_group in "$file_groups[@]"; do
+    file_group=(${(s[ ])file_group})
+    print "$PREFIX $script_name files $file_group"
+    files $file_group[@] ${files_opts:+-$files_opts}
+  done
+
+  update ${update_opts:+-$update_opts}
+}

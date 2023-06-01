@@ -1,0 +1,39 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys
+#
+# abs installs new custom-built packages and upgrades existing packages
+#
+abs () {
+  mkdir -p $HOME/abs
+  pkgs=(package-query)
+  for pkg in "$pkgs[@]"; do
+    cd $HOME/abs
+    [ ! -d "$pkg" ] && git clone https://aur.archlinux.org/"$pkg".git
+    cd "$pkg"
+
+    # skip if up to date
+    [ $(git pull --dry-run | wc -l) -eq 0 ] && continue
+
+    git pull
+    less PKGBUILD
+    while true; do
+      printf "$PREFIX Build package $pkg? [y]es [n]o [V]iew "
+      read yn
+      case $yn in
+        [Yy]|Yes|yes )
+          break ;;
+        [Nn]|No|no|"" )
+          print "$PREFIX Skipping..."
+          continue 2 ;;
+        [Vv]|View|view )
+          less PKGBUILD ;;
+        * ) ;;
+      esac
+    done
+    # there should be a better way to do this, so that the package isn't rebuilt
+    # if src hasn't changed, but I'm too lazy to figure it out right now.
+    makepkg -isc
+    git clean -fd
+  done
+}

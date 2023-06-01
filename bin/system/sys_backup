@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_backup
+#
+# This script backs up the current state of the system
+#
+backup () {
+  # record last update date
+  grep upgrade /var/log/pacman.log | tail -1 | cut -c 2-11 > "$state_dir"/last_update
+}

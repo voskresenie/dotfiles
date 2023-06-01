@@ -1,0 +1,204 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys
+#
+# This script manages copying and symlinking files
+#
+files () {
+  readonly local usage='TODO'
+  # Always include `local OPTIND` in any function that uses `getopts` otherwise
+  #   all `getopts` share a single global OPTIND
+  # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
+  local OPTIND opt
+  local managed_files=()
+  local prmpt=false list=false clean=false copy=false force=false verbose=false
+  while [ $OPTIND -le "$#" ]; do
+    if getopts :cfhlpvx opt; then
+      case $opt in
+        c) clean=true ;;
+        f) force=true ;;
+        h) print "Usage: $usage" && exit ;;
+        l) list=true ;;
+        p) prmpt=true ;;
+        v) verbose=true ;;
+        x) copy=true ;;
+        \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
+      esac
+    elif [ -n "${(P)OPTIND}" ]; then
+      managed_files+=($(eval print $"${(P)OPTIND}"))
+      ((OPTIND++))
+    fi
+  done
+
+  local root sudo
+
+  if [ "$list" = true ]; then
+    print "$PREFIX Files managed by $script_name $0:"
+    [ -f "$file_state" ] && cat "$file_state"
+    return
+  fi
+
+  if [ "$clean" = true ]; then
+    print "$PREFIX Removing files managed by $script_name $0:"
+    if [ -f "$file_state" ]; then
+      local tmp="$(mktemp)"
+      local existing_files=("${(@f)$(< "$file_state")}")
+
+      for (( i=1 ; i<=${#existing_files[@]} ; i++ )); do
+        f="$existing_files[$i]"
+        printf "(%d/%d) %s\n" "$i" "${#existing_files[@]}" "$f"
+
+        vprint $verbose "$PREFIX Backing up file before removing"
+        veval $verbose cp -u --backup=numbered --parents \"$f\" \"$file_backup_dir\"
+
+        sudo= # reset in case set by previous iterations
+        if [ ! -w "$f" ] || { [ -h "$f" ] && [ ! -w "$(dirname "$f")" ] }; then
+          request_root root "Missing write access for file, continue as root?"
+          [ "$root" = true ] && sudo="sudo -E" || {
+            print "$PREFIX Root access required, skipping..."
+            vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in state file"
+            veval $verbose print \"$f\" ">>" \"$tmp\"
+            continue
+          }
+        fi
+        vprint $verbose "$PREFIX Removing file$([ -n "$sudo" ] && print " as root")"
+        veval $verbose $sudo rm \"$f\" || {
+          print "$PREFIX Could not remove file"
+          vprint $verbose "$PREFIX Writing filename to temporary file to be preserved in state file"
+          veval $verbose print \"$f\" ">>" \"$tmp\"
+        }
+      done
+      vprint $verbose "$PREFIX Replacing state file with temporary file"
+      veval $verbose mv \"$tmp\" \"$file_state\"
+    fi
+    exit
+  fi
+
+  # how to find symlinks referencing source:
+  # $ find /home/ -type l -exec readlink -nf {} ';' -exec echo " -> {}" ';' | grep "/dir2"
+  # TODO: find any files that might take precedence
+  #
+  # TODO: add detection for whether existing destination is NOT a symlink
+
+  [ "$copy" = true ] && vprint $verbose "$PREFIX Copying files..." || vprint $verbose "$PREFIX Linking files..."
+  [ "$force" = true ] && vprint $verbose "$PREFIX Overwriting existing files with -f"
+  action=$([ "$copy" = true ] && echo 'copy' || echo 'link')
+
+  # TODO: clean up old files from $file_state
+  local src dst d filetype overwrite
+  for (( i=1 ; i<=${#managed_files[@]} ; i++ )); do
+    src="$(realpath -ms "$repo_dir/${managed_files[$i]%%:*}")"
+    dst="$(realpath -ms "${managed_files[$i]#*:}")"
+    printf "(%d/%d) %s: %s -> %s\n" \
+      "$i" "${#managed_files[@]}" "$action" "$src" "$dst"
+
+    [ -h "$dst" ] && filetype="symlink" ||
+      { [ -d "$dst" ] && filetype="directory" } ||
+      { [ -f "$dst" ] && filetype="file" }
+
+    vprint $verbose "$PREFIX Comparing source to destination"
+    veval $verbose cmp --silent \"$src\" \"$dst\" &&
+      { { [ -h "$dst" ] && [ ! "$copy" = true ] && [ "$(readlink -f "$dst")" = "$src" ] &&
+          msg="Destination is symlink to source" } ||
+        { [ ! -h "$dst" ] && [ "$copy" = true ] &&
+          msg="Destination and source are identical" } } &&
+      { [ "$force" = true ] && vprint $verbose "$PREFIX $msg, overwriting anyway with -f" ||
+        { vprint $verbose "$msg, skipping" &&
+          vprint $verbose "$PREFIX Adding to state file" &&
+          veval $verbose print \"$dst\" ">>" \"$file_state\" &&
+          continue } }
+
+    [ "$prmpt" = true ] &&
+      while true; do
+        printf "$PREFIX %s file? [y]es [N]o " $([ "$copy" = true ] && print "Copy" || print "Link")
+        read yn
+        case $yn in
+          [Yy]|Yes|yes )
+            break ;;
+          [Nn]|No|no|"" )
+            vprint $verbose "$PREFIX Skipping..."
+            continue 2 ;;
+          * ) ;;
+        esac
+      done
+
+    overwrite= # reset in case set by previous iterations
+    if [ -e "$dst" ] || [ -h "$dst" ]; then
+      [ ! "$force" = true ] &&
+        while true; do
+          printf "$PREFIX Destination $filetype $(basename "$dst") exists, overwrite? [y]es [N]o [d]iff "
+          read yn
+          case $yn in
+            [Yy]|Yes|yes )
+              break ;;
+            [Nn]|No|no|"" )
+              vprint $verbose "$PREFIX Skipping..."
+              continue 2 ;;
+            [Dd]|Diff|diff )
+              diff -aur --color=always "$dst" "$src"
+              ;;
+            * ) ;;
+          esac
+        done
+
+      # TODO: figure out how to handle symlinks with copying with backups
+      # -- currently copies contents into symlink
+      if [ -e "$dst" ]; then
+        local cmd="cp $( [ -d "$dst" ] && echo "-r" ) -u --backup=numbered --parents \"$dst\" \"$file_backup_dir\""
+        vprint $verbose "$PREFIX Backing up existing $filetype before overwriting"
+        veval $verbose $cmd &&
+          vprint $verbose "$PREFIX Backed up $filetype to $(realpath "$file_backup_dir/$dst")" ||
+          { [ "$force" = true ] &&
+              vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
+              while true; do
+                printf "$PREFIX Failed to back up $filetype, overwrite anyway? [y]es [N]o "
+                read yn
+                case $yn in
+                  [Yy]|Yes|yes )
+                    break ;;
+                  [Nn]|No|no|"" )
+                    print "$PREFIX Skipping..."
+                    continue 2 ;;
+                  * ) ;;
+                esac
+              done }
+        overwrite=true
+      fi
+    fi
+
+    # find last element of path that already exists
+    d="$dst"
+    while [ ! -e "$d" ] || [ -h "$d" ]; do
+      d="$(dirname "$d")"
+    done
+
+    # TODO: copy owner from file if already present, or directory if not
+    # maybe not needed because files are just me / root
+    #user=$(stat -c '%U' "$d")
+    #group=$(stat -c '%G' "$d")
+
+    sudo= # reset in case set by previous iterations
+    if [ ! -w "$d" ]; then
+      request_root root "Missing write access for destination $d, continue as root?"
+      [ "$root" = true ] && sudo="sudo -E" ||
+          { print "$PREFIX Root access required, skipping..." && continue }
+    fi
+
+    vprint $verbose "$PREFIX Making missing directories in path"
+    veval $verbose $sudo mkdir -p \"$(dirname "$dst")\"
+    veval $verbose "$sudo cp \"$src\" \"$dst\" \
+      $( [ -h "$dst" ] && echo "--remove-destination") \
+      $( [ "$overwrite" = true ] && echo "-f") \
+      $( [ "$copy" = true ] || echo "-s") \
+      $( [ "$verbose" = true ] || echo "2>/dev/null")" &&
+      { vprint $verbose "$PREFIX Adding to state file" &&
+        veval $verbose print \"$dst\" ">>" \"$file_state\" &&
+        [ "$copy" = true ] &&
+        vprint $verbose "$PREFIX Copied file" ||
+        vprint $verbose "$PREFIX Created symbolic link" } ||
+      { [ "$copy" = true ] &&
+        print "$PREFIX Could not copy file" ||
+        print "$PREFIX Could not create symbolic link" }
+  done
+  [ -f "$file_state" ] && sort -u "$file_state" -o "$file_state"
+}

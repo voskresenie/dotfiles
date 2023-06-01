@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_orphan_deps
+#
+# This script checks for orphaned dependencies
+#
+orphan-deps () {
+  readonly local usage='TODO'
+  local OPTIND opt
+  local quiet=false verbose=false
+  while getopts ":hqv" opt; do
+    case $opt in
+      h) print "Usage: $usage" && exit ;;
+      q) quiet=true ;;
+      v) verbose=true ;;
+      \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
+    esac
+  done
+
+  local orphs=$(pacman -Qtdq | wc -l)
+  [ ! "$quiet" = true ] && [ "$orphs" -eq 0 ] && print " no orphaned dependencies"
+  [ "$orphs" -ne 0 ] && warn "$orphs orphaned dependencies"
+  [ "$verbose" = true ] && pacman -Qtdq
+  return 0
+}

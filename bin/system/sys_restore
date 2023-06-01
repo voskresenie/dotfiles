@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys
+#
+# This script restores a system to its previous state
+#
+restore () {
+  # restore to previous date in case of bad update
+  # https://wiki.archlinux.org/title/Arch_Linux_Archive#How_to_restore_all_packages_to_a_specific_date
+  date="$(cat "$state_dir"/last_update)"
+
+  sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
+  mirrorlistcmd="echo \"Server=https://archive.archlinux.org/repos/$(print -r -- ${date//-/\/})/\\\$repo/os/\\\$arch\" > /etc/pacman.d/mirrorlist"
+  sudo sh -c "$mirrorlistcmd"
+  yes | pacman -Syyuu
+
+  sudo mv /etc/pacman.d/mirrorlist.backup /etc/pacman.d/mirrorlist
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_prereq
+#
+# This script covers prerequisites required for the script to run properly
+#
+prereq () {
+  mkdir -p "$file_backup_dir"
+
+  mkdir -p "$XDG_DESKTOP_DIR" \
+    "$XDG_DOWNLOAD_DIR" \
+    "$XDG_TEMPLATES_DIR" \
+    "$XDG_PUBLICSHARE_DIR" \
+    "$XDG_DOCUMENTS_DIR" \
+    "$XDG_MUSIC_DIR" \
+    "$XDG_PICTURES_DIR" \
+    "$XDG_VIDEOS_DIR"
+}

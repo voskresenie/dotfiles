@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+#
+# /usr/local/bin/sys_init
+#
+# This script initializes the system
+#
+init () {
+  readonly local usage='TODO'
+
+  readonly local __hostname="${1:-$hostname}"
+  [ -z "$__hostname" ] && echo "Missing hostname" >&2 && exit 1
+  readonly local package_groups="${@:2}"
+
+  if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
+    while true; do
+      printf "$PREFIX repo located at $repo_dir; move to $data_dir? [y]es [N]o "
+      read yn
+      case $yn in
+        [Yy]|Yes|yes )
+          mkdir -p "$XDG_DATA_HOME"
+          cp -r "$repo_dir" "$data_dir"
+          cd "$data_dir"
+          rm -rf "$repo_dir"
+          repo_dir="$data_dir"
+          print "$PREFIX new repo location: $repo_dir"
+          break ;;
+        [Nn]|No|no|"" ) break ;;
+        * ) ;;
+      esac
+    done
+  fi
+}
