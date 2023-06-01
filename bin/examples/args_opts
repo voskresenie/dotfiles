@@ -1,9 +1,12 @@
 #!/usr/bin/zsh
-
+#
+# bin/examples/args_opts
+#
 # example:
 #   $ args_opts arg1 -o opt1 -o opt2 arg2 arg3 -o opt3
 #   arguments: arg1 arg2 arg3
 #   options: opt1 opt2 opt3
+#
 fn() {
   script_args=()
   script_opts=()
