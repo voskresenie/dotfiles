@@ -152,6 +152,53 @@ init () {
       esac
     done
   fi
+
+  print $hostname > $cfg
+
+  # TODO: back up existing cfg first
+  mv $cfg $config_dir/system
+}
+
+__system () {
+  readonly local usage='TODO'
+
+  local OPTIND opt
+  local args=() files_opts update_opts
+  while [ $OPTIND -le "$#" ]; do
+    if getopts :fhpqv opt; then
+      case $opt in
+        f) files_opts+=$opt ;;
+        h) print "Usage: $usage" && exit ;;
+        p) files_opts+=$opt ;;
+        q) update_opts+=$opt ;;
+        v) files_opts+=$opt
+          update_opts+=$opt
+          ;;
+        \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
+      esac
+    elif [ -n "${(P)OPTIND}" ]; then
+      [ -z "$hostname" ] && hostname="${(P)OPTIND}" || { echo "Invalid argument: ${(P)OPTIND}" >&2 && exit 1 }
+      ((OPTIND++))
+    fi
+  done
+  [ -z "$hostname" ] && echo "Missing hostname" >&2 && exit 1
+
+  # TODO: init $hostname
+  declare -A host_file_groups
+  host_file_groups=(
+                    #hretha       'system_bins -x system_cfgs user_bins user_cfgs'
+                    hretha       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                    svarog       'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                    valhalla     'system_bins':'-x system_cfgs':'user_bins user_cfgs'
+                  )
+  local file_groups=(${(s[:])host_file_groups[$hostname]})
+  for file_group in "$file_groups[@]"; do
+    file_group=(${(s[ ])file_group})
+    print "$PREFIX $script_name files $file_group"
+    files $file_group[@] ${files_opts:+-$files_opts}
+  done
+
+  #update ${update_opts:+-$update_opts}
 }
 
 install () {
@@ -595,6 +642,9 @@ case $cmd in
   files) files "${@:2}" ;;
   hosts) hosts "${@:2}" ;;
   fstab) fstab "${@:2}" ;;
+  hretha) __system hretha "${@:2}" ;;
+  svarog) __system svarog "${@:2}" ;;
+  valhalla) __system valhalla "${@:2}" ;;
   *) echo "Invalid command $cmd" >&2
     exit 1
 esac
