@@ -51,6 +51,7 @@ system_bins=(
 system_cfgs=(
              "cfg/system/pacman.conf:/etc/pacman.conf"
              "cfg/system/profile.d/user.sh:/etc/profile.d/user.sh"
+             "cfg/system/reflector.conf:/etc/xdg/reflector/reflector.conf"
              "cfg/system/sysctl.d/disable_ipv6.conf:/etc/sysctl.d/disable_ipv6.conf"
              "cfg/system/zsh/zlogout:/etc/zsh/zlogout"
              "cfg/system/zsh/zprofile:/etc/zsh/zprofile"
