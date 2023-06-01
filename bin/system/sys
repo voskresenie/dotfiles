@@ -18,6 +18,7 @@ pkgname=voskarch
 script_name="$(basename $0)"
 script_dir="$(dirname "$(realpath "$0")")"
 repo_dir="$(realpath "$script_dir/../..")"
+export PATH=$script_dir:$PATH
 source "$repo_dir"/cfg/system/zsh/zshenv
 source "$repo_dir"/cfg/system/zsh/zprofile
 
