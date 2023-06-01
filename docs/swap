@@ -13,3 +13,6 @@ dd if=/dev/zero of="$swapfile" count=8k status=progress
 chmod 0600 "$swapfile"
 mkswap -U clear "$swapfile"
 echo "$swapfile" none swap defaults 0 0 >> /etc/fstab
+
+# run to verify it's working
+free -m
