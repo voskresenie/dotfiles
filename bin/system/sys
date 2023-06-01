@@ -5,6 +5,7 @@
 # This script initializes and maintains a system in a standardized format
 #
 # Usage:
+# * init - initial setup
 # * TODO - install packages
 # * TODO - update packages
 # * files - copy or symlink managed files
@@ -13,6 +14,8 @@
 #
 # TODO: this is apparently bad for some reason, fix it
 # http://mywiki.wooledge.org/BashFAQ/028
+pkgname=voskarch
+script_name="$(basename $0)"
 script_dir="$(dirname "$(realpath "$0")")"
 repo_dir="$(realpath "$script_dir/../..")"
 source "$repo_dir"/cfg/system/zsh/zshenv
@@ -27,7 +30,7 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
-pkgname=voskarch
+config_dir="$XDG_CONFIG_HOME/$pkgname"
 state_dir="$XDG_STATE_HOME/$pkgname"
 data_dir="$XDG_DATA_HOME/$pkgname"
 
@@ -126,10 +129,14 @@ prereq () {
     "$XDG_VIDEOS_DIR"
 }
 
-sys () {
+init () {
+  readonly local hostname=${1:?"The hostname must be specified."}
+  readonly local package_groups="${@:2}"
+  local cfg="$(mktemp)"
+
   if [ "$repo_dir" != "$(realpath -m "$data_dir")" ]; then
     while true; do
-      printf "$PREFIX repo located at $repo_dir; move to $data_dir? (y/N) "
+      printf "$PREFIX repo located at $repo_dir; move to $data_dir? [y]es [N]o "
       read yn
       case $yn in
         [Yy]|Yes|yes )
@@ -148,7 +155,7 @@ sys () {
 }
 
 install () {
-  echo "install not implemented" >&2
+  echo "$script_name $0 not implemented" >&2
 
   sudo pacman -Syyu
   pkgs=(pkgfile nano)
@@ -185,7 +192,7 @@ abs () {
     git pull
     less PKGBUILD
     while true; do
-      printf "$PREFIX Build package $pkg? (y/n/V) "
+      printf "$PREFIX Build package $pkg? [y]es [n]o [V]iew "
       read yn
       case $yn in
         [Yy]|Yes|yes )
@@ -212,13 +219,15 @@ backup () {
 }
 
 orphan-deps () {
+  readonly local usage='TODO'
   local OPTIND opt
   local quiet=false verbose=false
-  while getopts ":qv" opt; do
+  while getopts ":hqv" opt; do
     case $opt in
+      h) print "Usage: $usage" && exit ;;
       q) quiet=true ;;
       v) verbose=true ;;
-      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+      \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
     esac
   done
 
@@ -230,13 +239,15 @@ orphan-deps () {
 }
 
 update () {
+  readonly local usage='TODO'
   local OPTIND opt
   local quiet=false verbose=false
-  while getopts ":qv" opt; do
+  while getopts ":hqv" opt; do
     case $opt in
+      h) print "Usage: $usage" && exit ;;
       q) quiet=true ;;
       v) verbose=true ;;
-      \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+      \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
     esac
   done
 
@@ -346,7 +357,7 @@ request_root () {
   eval local __root=$"$__rootvar"
   local msg=$2
   while [ -z "$__root" ]; do
-    printf "$msg (Y/n) "
+    printf "$PREFIX Build package $pkg? [%]es [n]o "
     read yn
     case $yn in
       [Yy]|Yes|yes|"" )
@@ -362,6 +373,7 @@ request_root () {
 }
 
 files () {
+  readonly local usage='TODO'
   # Always include `local OPTIND` in any function that uses `getopts` otherwise
   #   all `getopts` share a single global OPTIND
   # https://stackoverflow.com/questions/63661198/zsh-getopts-optind-behavior-not-consistent-with-other-shells-bash-sh
@@ -369,15 +381,16 @@ files () {
   local managed_files=()
   local prmpt=false list=false clean=false copy=false force=false verbose=false
   while [ $OPTIND -le "$#" ]; do
-    if getopts :plcxfv opt; then
+    if getopts :cfhlpvx opt; then
       case $opt in
-        p) prmpt=true ;;
-        l) list=true ;;
         c) clean=true ;;
-        x) copy=true ;;
         f) force=true ;;
+        h) print "Usage: $usage" && exit ;;
+        l) list=true ;;
+        p) prmpt=true ;;
         v) verbose=true ;;
-        \?) echo "Invalid option -$OPTARG" >&2 && exit 1 ;;
+        x) copy=true ;;
+        \?) echo "Invalid option -$opt\nUsage: $usage" >&2 && exit 1 ;;
       esac
     elif [ -n "${(P)OPTIND}" ]; then
       managed_files+=($(eval print $"${(P)OPTIND}"))
@@ -388,13 +401,13 @@ files () {
   local root sudo
 
   if [ "$list" = true ]; then
-    print "$PREFIX Files managed by $pkgname $0:"
+    print "$PREFIX Files managed by $script_name $0:"
     [ -f "$file_state" ] && cat "$file_state"
     return
   fi
 
   if [ "$clean" = true ]; then
-    print "$PREFIX Removing files managed by $pkgname $0:"
+    print "$PREFIX Removing files managed by $script_name $0:"
     if [ -f "$file_state" ]; then
       local tmp="$(mktemp)"
       local existing_files=("${(@f)$(< "$file_state")}")
@@ -437,13 +450,15 @@ files () {
 
   [ "$copy" = true ] && vprint $verbose "$PREFIX Copying files..." || vprint $verbose "$PREFIX Linking files..."
   [ "$force" = true ] && vprint $verbose "$PREFIX Overwriting existing files with -f"
+  action=$([ "$copy" = true ] && echo 'copy' || echo 'link')
 
   # TODO: clean up old files from $file_state
   local src dst d filetype overwrite
   for (( i=1 ; i<=${#managed_files[@]} ; i++ )); do
     src="$(realpath -ms "$repo_dir/${managed_files[$i]%%:*}")"
     dst="$(realpath -ms "${managed_files[$i]#*:}")"
-    printf "(%d/%d) %s -> %s\n" "$i" "${#managed_files[@]}" "$src" "$dst"
+    printf "(%d/%d) %s: %s -> %s\n" \
+      "$i" "${#managed_files[@]}" "$action" "$src" "$dst"
 
     [ -h "$dst" ] && filetype="symlink" ||
       { [ -d "$dst" ] && filetype="directory" } ||
@@ -463,7 +478,7 @@ files () {
 
     [ "$prmpt" = true ] &&
       while true; do
-        printf "$PREFIX %s file? (y/N) " $([ "$copy" = true ] && print "Copy" || print "Link")
+        printf "$PREFIX %s file? [y]es [N]o " $([ "$copy" = true ] && print "Copy" || print "Link")
         read yn
         case $yn in
           [Yy]|Yes|yes )
@@ -479,7 +494,7 @@ files () {
     if [ -e "$dst" ] || [ -h "$dst" ]; then
       [ ! "$force" = true ] &&
         while true; do
-          printf "$PREFIX Destination $filetype $(basename "$dst") exists, overwrite? (y/N) "
+          printf "$PREFIX Destination $filetype $(basename "$dst") exists, overwrite? [y]es [N]o [d]iff "
           read yn
           case $yn in
             [Yy]|Yes|yes )
@@ -487,6 +502,9 @@ files () {
             [Nn]|No|no|"" )
               vprint $verbose "$PREFIX Skipping..."
               continue 2 ;;
+            [Dd]|Diff|diff )
+              diff -aur --color=always "$dst" "$src"
+              ;;
             * ) ;;
           esac
         done
@@ -501,7 +519,7 @@ files () {
           { [ "$force" = true ] &&
               vprint $verbose "$PREFIX Failed to back up $filetype, overwriting anyway with -f" ||
               while true; do
-                printf "$PREFIX Failed to back up $filetype, overwrite anyway? (y/N) "
+                printf "$PREFIX Failed to back up $filetype, overwrite anyway? [y]es [N]o "
                 read yn
                 case $yn in
                   [Yy]|Yes|yes )
@@ -553,8 +571,12 @@ files () {
   [ -f "$file_state" ] && sort -u "$file_state" -o "$file_state"
 }
 
-hosts() {
-  echo "hosts not implemented" >&2
+hosts () {
+  echo "$script_name $0 not implemented" >&2
+}
+
+fstab () {
+  echo "$script_name $0 not implemented" >&2
 }
 
 fstab() {
