@@ -1,0 +1,213 @@
+# Explicitly installed packages by host
+# loosely categorized by function
+# pkg                                   # H S V #
+
+# printer
+cups                                    # H   V #
+libcups                                 # H S V # dependencies, not explicit
+ghostscript                             # H   V #
+brlaser (aur)                           # H   V #
+
+# battery
+acpi                                    # H     #
+
+# bluetooth
+blueman                                 # H     #
+bluez                                   # H     #
+bluez-hid2hci                           # H     #
+bluez-utils                             # H     #
+
+# fonts
+adobe-source-han-sans-cn-fonts          # H S   #
+adobe-source-han-sans-jp-fonts          # H S   #
+adobe-source-han-sans-kr-fonts          # H S   #
+otf-galliard-itc                        # H     #
+otf-helvetica-neue                      # H S   #
+otf-inconsolata-lgc                     # H S   #
+otf-powerline-symbols-vosk              # H     #
+ttf-times-new-roman                     #   S   #
+
+# audio
+alsa-tools                              # H     #
+alsa-utils                              # H S V #
+apulse                                  #   S V #
+pavucontrol                             # H     #
+pipewire-alsa                           # H     #
+pipewire-jack                           # H     #
+pipewire-pulse                          # H     #
+qjackctl                                # H     #
+wireplumber                             # H     #
+
+# media player
+amberol                                 #       # not installed, should consider
+kodi                                    #   S V #
+kodi-eventclients                       #     V #
+kodi-standalone-gbm-service             #     V #
+kodi-standalone-service                 #     V #
+mpc                                     # H S V #
+mpd                                     # H S V #
+mpv                                     # H S V #
+ncmpcpp                                 # H S V #
+retroarch-standalone-service            #     V #
+spotify                                 #   S   #
+
+# UX/theme
+arc-gtk-theme                           # H S   #
+arc-icon-theme                          # H S   #
+dmenu2                                  # H S   #
+dunst                                   # H     #
+dwm                                     # H S   #
+kde-gtk-config                          # H     #
+lxappearance-gtk3                       # H S   #
+materia-gtk-theme                       #       # not installed, should consider
+picom                                   # H S   #
+redshift                                # H     #
+slock                                   # H S   #
+wmname                                  # H S   #
+xbindkeys                               # H S   #
+xorg-font-utils                         # H     #
+xorg-server                             # H S   #
+xorg-xbacklight                         # H     #
+xorg-xinit                              # H S   #
+xorg-xrandr                             # H     #
+xorg-xsetroot                           # H S   #
+xsel                                    # H S V #
+
+# devices
+android-tools                           # H     #
+usbutils                                # H S V #
+
+# editing
+audacity                                # H S   #
+fontforge                               # H     #
+krita                                   # H S   #
+calligra                                #       # not installed, should consider
+
+# system
+linux                                   # H S V #
+kernel-modules-hook                     # H S   #
+base                                    # H S V #
+efibootmgr                              # H     #
+logrotate                               # H S V #
+systemd-swap                            # H S   #
+ntp                                     # H S V #
+
+# screen recording
+screenfetch                             # H     #
+scrot                                   # H S   #
+simplescreenrecorder                    #   S   #
+
+# utils
+htop                                    # H S V #
+git                                     # H S V #
+less                                    #   S   # required by man-db
+man-db                                  # H S V #
+man-pages                               # H S V #
+mlocate                                 # H S V #
+ncdu                                    # H S V # ncurses disk usage analyzer
+neovim                                  # H S V #
+openssh                                 # H S V #
+openvpn                                 # H     #
+ranger                                  # H   V #
+sudo                                    # H S V #
+tmux                                    # H S V #
+tree                                    # H   V #
+unrar                                   # H S   #
+unzip                                   #   S V #
+vim                                     # H S V #
+zsh                                     # H S V #
+chezmoi                                 #       # not installed, should consider
+
+# package management
+pacgraph                                # H     #
+package-query                           # H S V #
+pacman-contrib                          # H S V #
+pkgfile                                 # H S V #
+yaourt                                  # H S V #
+yay                                     # H S V #
+
+# building / development
+base-devel                              # H S V #
+cmake                                   # H S   #
+delve                                   # H     #
+go                                      # H S V #
+google-cloud-sdk                        # H     #
+nginx-mainline                          #     V #
+postgresql-libs                         # H     #
+python                                  # H S V #
+python-virtualenv                       #     V #
+jdk-openjdk                             # H     #
+android-studio                          # H     #
+android-sdk                             #       # consider
+gradle                                  #       # consider
+
+# calculator
+bc                                      # H     #
+r                                       # H S   #
+
+# filesystems
+btrfs-progs                             #     V #
+mdadm                                   # H S V #
+sysfsutils                              # H S V #
+
+# books
+calibre                                 # H     #
+
+# browser
+chromium                                # H S   #
+firefox                                 # H S   #
+
+# network
+dhcpcd                                  # H S V #
+dialog                                  #   S   #
+inetutils                               # H S V #
+iw                                      # H S   #
+iwd                                     # H     #
+netctl                                  # H S V #
+wpa_supplicant                          # H S   #
+
+# hardware
+ibus                                    # H S   #
+intel-ucode                             # H S   #
+lib32-mesa-vdpau                        #   S   #
+lib32-vulkan-mesa-layers                #   S   #
+lib32-vulkan-radeon                     #   S   #
+linux-firmware                          # H     #
+mesa-vdpau                              #   S   #
+pcmciautils                             #   S   #
+sof-firmware                            # H     #
+vulkan-intel                            # H     #
+vulkan-mesa-layers                      #   S   #
+vulkan-radeon                           #   S   #
+vulkan-tools                            #   S   #
+xf86-video-amdgpu                       #   S   #
+xf86-video-ati                          #     V #
+xf86-video-intel                        # H     #
+
+# terminal
+rxvt-unicode                            # H S   #
+rxvt-unicode-terminfo                   #     V #
+st                                      # H     #
+
+# data transfer
+curl                                    #
+drive                                   #     V #
+nfs-utils                               # H S V #
+rclone                                  # H     # not used yet, considering
+rsync                                   # H S V #
+rtorrent                                # H S V #
+speedtest-cli                           #     V #
+wget                                    # H     #
+
+# gaming
+piper                                   #   S   # gaming mice
+sc-controller                           #   S   # steam controller
+steam                                   # H S   #
+steam-native-runtime                    # H S   #
+
+feh                                     # H S   #
+mupdf                                   # H S   #
+
+lsof                                    # H S   #
+lvm2                                    # H S V #
+weechat                                 # H     #
