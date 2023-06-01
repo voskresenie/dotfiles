@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+services=(
+          sshd.service
+          systemd-swap.service
+          reflector.service
+          reflector.timer
+          remote-fs.service
+        )
+for service in "$services[@]"; do
+  systemctl enable $service
+  systemctl start $service
+done
