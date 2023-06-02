@@ -6,6 +6,7 @@ listop prepend PROFILES ${(%):-%x}
 # go
 export GOPATH=$XDG_DATA_HOME/go
 export PATH=$GOPATH/bin:$PATH
+typeset -U path
 # Android SDK
 export ANDROID_HOME=$XDG_DATA_HOME/android/sdk
 export JAVA_HOME=/usr/lib/jvm/default
