@@ -19,6 +19,7 @@ update () {
 
   # "description:normal command:[quiet command]:[verbose command]"
   local cmds=(
+              # TODO: update mirrorlist with reflector
               'Updating package database:sudo pacman -Sy::'
               #'Updating package keys:sudo pacman-key --refresh-keys::'
               #'Updating package keys:sudo pacman-key --updatedb::'
