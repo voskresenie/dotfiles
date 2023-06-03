@@ -1,4 +1,9 @@
 #!/usr/bin/env zsh
+#
+# docs/systemd-services
+#
+# enables and starts systemd services
+#
 services=(
           sshd.service
           systemd-swap.service

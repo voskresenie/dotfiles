@@ -1,0 +1,29 @@
+#!/usr/bin/env zsh
+#
+# docs/permissions
+#
+# Creates groups and adds user to groups
+#
+groups=(audio video)
+declare -A usergroupsmap=(
+                          $USER     wheel:audio:video:input ## ?? on input
+                          mpd       audio
+                        )
+
+for group in "$groups[@]"; do
+  print $group
+  #groupadd $group
+done
+
+for user groups in "${(@kv)usergroupsmap}"; do
+  local first=true
+  for group in "${(s[:])groups}"; do
+    if [ "$first" = true ]; then
+      print "$user -> $group"
+      first=false
+    else
+      print "${user//?/ } -> $group"
+    fi
+    #usermod -a -G $group $user
+  done
+done
