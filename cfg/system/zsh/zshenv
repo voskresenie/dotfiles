@@ -72,6 +72,9 @@ export ZSTATEDIR=$XDG_STATE_HOME/zsh
 
 listop prepend PATH $HOME/bin
 
+# QT theme manager
+export QT_STYLE_OVERRIDE=kvantum
+
 export PS1='@%m %1~ $ '
 export EDITOR=nvim
 export PAGER=less

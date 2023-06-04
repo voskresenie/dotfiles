@@ -52,12 +52,15 @@ retroarch-standalone-service            #     V #
 spotify                                 #   S   #
 
 # UX/theme
+arc-kde                                 # H     #
 arc-gtk-theme                           # H S   #
 arc-icon-theme                          # H S   #
 dmenu2                                  # H S   #
 dunst                                   # H     #
 dwm                                     # H S   #
 kde-gtk-config                          # H     #
+kvantum                                 # H     #
+kvantum-theme-arc                       # H     #
 lxappearance-gtk3                       # H S   #
 materia-gtk-theme                       #       # not installed, should consider
 picom                                   # H S   #
