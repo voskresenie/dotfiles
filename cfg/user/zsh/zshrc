@@ -200,3 +200,22 @@ webm() {
     eval "$ffmpeg_str"
     # TODO: add filesize check, repeat if unsatisfactory
 }
+
+purge() {
+	if (( # == 0 )); then
+		print >&2 "Usage: $0 filename"
+		return 1
+	fi
+
+	mv $1 /mnt/media/purge
+	return 0
+}
+
+medtree() {
+	dir=$(pwd)
+	cd /mnt/drive
+	tree /mnt/media > tree
+	yes | drive push tree
+	cd $dir
+	return 0
+}
