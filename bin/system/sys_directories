@@ -7,7 +7,7 @@
 #PREFIX="$BLUE::$RESET"
 declare -A pkgdirsmap=(
                        zsh        "$XDG_CONFIG_HOME/zsh:$XDG_STATE_HOME/zsh"
-                       pzsh       "$XDG_CONFIG_HOME/zsh:$XDG_STATE_HOME/zsh"
+                       vim        "$XDG_DATA_HOME/vim/bundle"
                      )
 
 directories () {
