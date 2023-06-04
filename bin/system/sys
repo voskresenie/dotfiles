@@ -39,6 +39,7 @@ source "$repo_dir"/bin/system/sys_restore
 source "$repo_dir"/bin/system/sys_system
 source "$repo_dir"/bin/system/sys_update
 source "$repo_dir"/bin/system/sys_utils
+source "$repo_dir"/bin/system/sys_vundle
 
 # these should already be set by one of the profile files, but might be worth
 # keeping around anyway just in case

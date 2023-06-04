@@ -31,7 +31,7 @@ update () {
               'Updating pkgfile:sudo pkgfile -u 1>/dev/null::'
               'Updating mlocate db:sudo updatedb::'
               'Ensuring package directories exist:directories:directories 1>/dev/null:'
-              'Updating vundle:nvim +BundleUpdate +q +q::'
+              'Ensuring vundle installed and up to date:vundle::'
               'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
               # swap escape seems to get messed up sometimes after update, consider running it here
               'Swapping escape and capslock key:setxkbmap -option caps:swapescape::'

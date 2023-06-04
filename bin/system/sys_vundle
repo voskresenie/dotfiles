@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+#
+# bin/system/sys_vundle
+#
+# Creates directories needed for applications to run
+#
+vundle () {
+  readonly local usage='TODO'
+  if [ ! -d "$XDG_DATA_HOME"/vim/bundle/Vundle.vim ]; then
+    print "$PREFIX Installing vundle..."
+    git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
+    vim +BundleInstall +q +q 1>/dev/null && print "$PREFIX vundle successfully installed" || warn "unable to install vundle"
+  else
+    print "$PREFIX Updating vundle..."
+    nvim +BundleUpdate +q +q 1>/dev/null
+  fi
+}
