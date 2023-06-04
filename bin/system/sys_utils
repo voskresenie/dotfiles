@@ -58,7 +58,7 @@ request_root () {
   eval local __root=$"$__rootvar"
   local msg=$2
   while [ -z "$__root" ]; do
-    printf "$PREFIX $msg? [%]es [n]o "
+    printf "$PREFIX $msg? [Y]es [n]o "
     read yn
     case $yn in
       [Yy]|Yes|yes|"" )
