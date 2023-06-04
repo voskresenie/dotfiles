@@ -29,6 +29,7 @@ PREFIX="$BLUE::$RESET"
 # sys scripts
 source "$repo_dir"/bin/system/sys_abs
 source "$repo_dir"/bin/system/sys_backup
+source "$repo_dir"/bin/system/sys_directories
 source "$repo_dir"/bin/system/sys_files
 source "$repo_dir"/bin/system/sys_init
 source "$repo_dir"/bin/system/sys_install

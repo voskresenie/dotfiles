@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+#
+# docs/directories
+#
+# Creates directories needed for applications to run
+#
+#PREFIX="$BLUE::$RESET"
+declare -A pkgdirsmap=(
+                       zsh        "$XDG_CONFIG_HOME/zsh:$XDG_STATE_HOME/zsh"
+                       pzsh       "$XDG_CONFIG_HOME/zsh:$XDG_STATE_HOME/zsh"
+                     )
+
+directories () {
+  readonly local usage='TODO'
+  readonly local do_it_live=false ## TODO
+  local installed_pkgs="$(pacman -Qq)"
+  local pkg dirarr dir
+  for pkg dirarr in "${(@kv)pkgdirsmap}"; do
+    if [ "$(print $installed_pkgs | grep $pkg | wc -l)" -eq 1 ]; then
+      print "$PREFIX Creating directories for $pkg..."
+      for dir in "${(s[:])dirarr}"; do
+        [ -d "$dir" ] && print "$dir already exists" || print "Creating $dir"
+        if [ "$do_it_live" = true ]; then
+          mkdir -p "$dir"
+        fi
+      done
+    else
+      print "$PREFIX $pkg not installed, skipping..."
+    fi
+  done
+  print "$PREFIX Successfully created directories for all installed packages"
+}
