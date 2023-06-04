@@ -1,0 +1,31 @@
+#!/usr/bin/zsh
+#
+# bin/examples/split_str
+#
+# You can use:
+# $ parts=(${(s/:/)str})
+# 
+# Some common character pairs are also supported like:
+# $ parts=(${(s[:])str})
+# 
+# If you're going to use the @ flag to preserve empty elements, then you need to quote:
+# $ parts=("${(@s[:])str}")
+#
+# Source: https://unix.stackexchange.com/questions/614299/how-to-split-a-string-by-character-in-bash-zsh
+#
+# usage:
+#   $ split_str str delimiter
+#   parts: str1 str2 str3 ...
+#
+# example:
+#   $ split_str a:b:c :
+#   parts: a b c
+#
+fn() {
+  local __str=${1:?"The str var must be specified."}
+  local __delim=${2:?"The delimiter must be specified."}
+
+  eval 'parts=(${(s/'$__delim'/)__str})'
+  echo "parts: $parts[@]"
+}
+fn "${@:1}"
