@@ -20,35 +20,36 @@ update () {
   # "description:normal command:[quiet command]:[verbose command]"
   local cmds=(
               # TODO: update mirrorlist with reflector
-              'Updating package database:sudo pacman -Sy::'
+              'Updating package database:sudo pacman -Sy::sudo pacman -Syv'
               #'Updating package keys:sudo pacman-key --refresh-keys::'
               #'Updating package keys:sudo pacman-key --updatedb::'
-              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman --color always -S archlinux-keyring 1>/dev/null:'
-              "Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su $( [ "$verbose" = true ] || echo "1>/dev/null 2>/dev/null"):"
-              'Updating package search:sudo pacman -Fy::' # possibly redundant with -Sy
+              'Updating package keys:sudo pacman -S archlinux-keyring:yes | sudo pacman --color always -S archlinux-keyring 1>/dev/null 2>/dev/null:sudo pacman -Sv archlinux-keyring'
+              'Updating packages:sudo pacman -Su:yes | sudo pacman --color always -Su 1>/dev/null 2>/dev/null:sudo pacman -Suv'
+              'Updating package search:sudo pacman -Fy:sudo pacman -Fy 1>/dev/null:sudo pacman -Fyv' # possibly redundant with -Sy
               'Checking for orphaned dependencies:orphan-deps:orphan-deps -q:orphan-deps -v'
               'Updating abs:abs:false:'
-              'Updating pkgfile:sudo pkgfile -u 1>/dev/null::'
+              'Updating pkgfile:sudo pkgfile -u 1>/dev/null::sudo pkgfile -u'
               'Updating mlocate db:sudo updatedb::'
               'Ensuring package directories exist:directories:directories 1>/dev/null:'
               'Ensuring vundle installed and up to date:vundle::'
               'Syncing hwclock with ntpd:__out=$(sudo ntpd -qg) && sudo hwclock --systohc && print $__out | tail -n 1::sudo ntpd -qg 1>/dev/null && sudo hwclock --systohc'
               # swap escape seems to get messed up sometimes after update, consider running it here
-              'Swapping escape and capslock key:setxkbmap -option caps:swapescape::'
+              'Swapping escape and capslock key:setxkbmap -option caps::'
               )
   for (( i=1 ; i<=${#cmds[@]} ; i++ )); do
     local parts=("${(@s[:])cmds[$i]}")
     local desc="$parts[1]"
-    local cmd="$parts[2]"
+    local cmd="$parts[2]" quiet_cmd="$parts[3]" verbose_cmd="$parts[4]"
     if [ "$quiet" = true ]; then
-      [ "$parts[3]" = false ] && print "$PREFIX $desc -- skipping in quiet mode" && continue
-      [ -n "$parts[3]" ] && cmd="$parts[3]" || cmd="$cmd 1>/dev/null"
+      [ "$quiet_cmd" = false ] && print "$PREFIX $desc -- skipping in quiet mode" && continue
+      [ -n "$quiet_cmd" ] && cmd="$quiet_cmd" || cmd="$cmd 1>/dev/null"
     elif [ "$verbose" = true ]; then
-      [ -n "$parts[4]" ] && cmd="$parts[4]"
+      [ -n "$verbose_cmd" ] && cmd="$verbose_cmd"
+    else
+      cmd="$cmd"
     fi
     print "$PREFIX $desc..."
-    veval $verbose "$cmd" ||
-      { print "$PREFIX Failed to complete update" && return }
+    veval "$verbose" "$cmd" || warn "$desc failed"
   done
   print "$PREFIX Successfully updated system"
 }

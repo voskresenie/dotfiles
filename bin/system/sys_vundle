@@ -11,7 +11,7 @@ vundle () {
     git clone https://github.com/VundleVim/Vundle.vim.git "$XDG_DATA_HOME"/vim/bundle/Vundle.vim
     vim +BundleInstall +q +q 1>/dev/null && print "$PREFIX vundle successfully installed" || warn "unable to install vundle"
   else
-    print "$PREFIX Updating vundle..."
+    print "$PREFIX Vundle installed. Updating..."
     nvim +BundleUpdate +q +q 1>/dev/null
   fi
 }
