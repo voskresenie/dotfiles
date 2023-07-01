@@ -82,6 +82,22 @@ pacman-cheatsheet () {
 alias makepkg-rebuild='makepkg -fi'
 alias initpkgsums='makepkg -g >> PKGBUILD'
 
+# documents
+pdf () {
+  readonly local cmd="${1:?'The command must be specified}"
+  readonly local dst="${@:$#}"
+  readonly local src=("${@:2:$(( "$#" - 2 ))}")
+
+  print "Source: $src"
+  print "Destination: $dst"
+  case $cmd in
+    [b](uild)(#c,1)) convert $src "$dst" ;;
+    [c](oncat)(#c,1)) gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile="$dst" $src ;;
+    *) echo "Invalid command $cmd" >&2
+      exit 1
+  esac
+}
+
 # screenshots
 alias lastscreen='ls ~/ss/*.png | tail -n 1'
 alias vlastscreen='feh "$(ls ~/ss/*.png | tail -n 1)"'

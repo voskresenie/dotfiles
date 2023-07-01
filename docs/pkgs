@@ -214,3 +214,5 @@ mupdf                                   # H S   #
 lsof                                    # H S   #
 lvm2                                    # H S V #
 weechat                                 # H     #
+
+imagemagick                             # H     #
