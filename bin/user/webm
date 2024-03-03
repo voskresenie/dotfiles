@@ -1,0 +1,66 @@
+#!/usr/bin/env zsh
+#
+# ~/bin/webm
+#
+# This script converts a video to a 4chan-compatible webm format.
+#
+# usage: webm -i INPUT -o OUTPUT -s START -d DURATION
+#             [-w WIDTH] [-q QUALITY] [-t]
+### START and DURATION must be a time duration
+#            specification, see the Time duration
+#            section in the ffmpeg-utils(1) manual.
+webm () {
+  readonly usage="Usage: $0 -i INPUT -o OUTPUT -s START -d DURATION [-w WIDTH] [-q QUALITY] [-t]"
+  [ "$#" -eq 0 ] && >&2 print "$0: missing arguments\n$usage" && exit 1
+  
+  while getopts ":i:o:w:q:s:d:th" opt; do
+    case $opt in
+      h) print $usage && exit 1 ;;
+      i) input="$OPTARG" ;;
+      o) output="$OPTARG" ;;
+      w) width="$OPTARG" ;;
+      q) quality="$OPTARG" ;;
+      s) start="$OPTARG" ;;
+      d) duration="$OPTARG" ;;
+      t) subtitles=true ;;
+      :)  echo "Missing argument -$OPTARG" >&2
+          exit 1 ;;
+      \?) echo "Invalid option -$OPTARG" >&2
+          exit 1
+    esac
+  done
+  
+  if [ -z "$input" ]; then
+    printf "Required input parameter -i not given\n"
+    return
+  fi
+  
+  if [ -z "$output" ]; then
+    printf "Required output parameter -o not given\n"
+    return
+  fi
+  
+  if [ -z "$start" ]; then
+    printf "Required start time parameter -s not given\n"
+    return
+  fi
+  
+  if [ -z "$duration" ]; then
+    printf "Required duration parameter -e not given\n"
+    return
+  fi
+  
+  if [ "$subtitles" ]; then
+    subtitles_opts="-vf subtitles=$input"
+  fi
+  
+  if [ -z "$width" ]; then
+    width=960
+  fi
+  
+  ffmpeg_str="ffmpeg -threads 8 -i $input -codec:v libvpx -vf scale=$width:-1 -crf 10 -b:v 3M -ss $start -t $duration -an -sn $subtitles_opts $output"
+  eval "$ffmpeg_str"
+  # TODO: add filesize check, repeat if unsatisfactory
+}
+
+webm "$@"

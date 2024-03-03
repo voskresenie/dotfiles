@@ -78,6 +78,7 @@ system_cfgs=(
            )
 
 user_bins=(
+           "bin/user/webm:$HOME/bin/webm"
            "bin/user/xstat:$HOME/bin/xstat"
          )
 
