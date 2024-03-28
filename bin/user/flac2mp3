@@ -1,0 +1,54 @@
+#!/bin/zsh
+# flac2mp3
+
+# get the input directory
+indir="$(realpath "$2")"
+
+if [ ! -d "$indir" ]
+  then
+    echo "Please enter a valid input directory"
+    exit
+fi
+
+# get the target bitrate
+bitrate=$1
+
+if [ $bitrate = "v0" ]
+  then
+    bitparam="-qscale:a 0"
+elif [ $bitrate = "v2" ]
+  then
+    bitparam="-qscale:a 2"
+elif [ $bitrate = "320k" ]
+  then
+    bitparam="-b:a 320k"
+elif [ $bitrate = "all" ]
+  then
+    $0 v0 "$indir"
+    $0 v2 "$indir"
+    $0 320k "$indir"
+    exit
+else
+    echo "Please enter a valid bitrate"
+    exit
+fi
+
+# get the output directory
+if [ ! -d "$3" ]
+  then
+    if [ $3 ]
+      then
+        outdir="$(realpath "$3")"
+      else
+        outdir="${indir} [${bitrate}]"
+    fi
+
+    print "Creating output directory if not exists: $outdir"
+    mkdir -p "$outdir"
+fi
+
+for f in "$indir"/*.flac; do
+    filename=$(basename "$f" .flac)
+    print "Encoding file to ${bitrate}: $filename"
+    ffmpeg -loglevel error -i "$f" $(echo $bitparam) "${outdir}/${filename}.mp3"
+done
