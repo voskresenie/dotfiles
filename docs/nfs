@@ -2,7 +2,28 @@
 #
 # nfs - network filesystem
 #
-# usage: sudo ./nfs
+# usage: sudo ./nfs [server|client]
 #
 # TODO: other nfs setup
-echo valhalla:/srv/nfs/media /mnt/media nfs rw,rsize=8192,wsize=8192,timeo=14,_netdev 0 0 >> /etc/fstab
+
+server () {
+  print "server" && exit
+
+  # http://wiki.archlinux.org/title/NFS#Enabling_NFSv4_idmapping
+  echo N > /sys/module/nfsd/parameters/nfs4_disable_idmapping
+  echo 'nfs nfs4_disable_idmapping=0' >> /etc/modprobe.d/nfsd.conf
+  echo 'nfsd nfs4_disable_idmapping=0' >> /etc/modprobe.d/nfsd.conf
+}
+
+client () {
+  print "client" && exit
+  echo valhalla:/srv/nfs/media /mnt/media nfs rw,rsize=8192,wsize=8192,timeo=14,_netdev 0 0 >> /etc/fstab
+
+  # http://wiki.archlinux.org/title/NFS#Enabling_NFSv4_idmapping
+  echo N > /sys/module/nfs/parameters/nfs4_disable_idmapping
+  echo 'nfs nfs4_disable_idmapping=0' >> /etc/modprobe.d/nfsd.conf
+  echo 'nfsd nfs4_disable_idmapping=0' >> /etc/modprobe.d/nfsd.conf
+}
+
+# TODO: make this ensure $1 is either server or client
+exec $1
