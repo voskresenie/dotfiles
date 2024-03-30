@@ -32,7 +32,7 @@ xbindkeys &
 setxkbmap -option "caps:swapescape"
 
 # set wallpaper
-${XDG_CONFIG_HOME:-~/.config}/fehbg
+${XDG_CONFIG_HOME:-~/.config}/feh/fehbg
 
 # window dropshadow
 compton -b -e .3 --vsync opengl

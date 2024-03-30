@@ -86,7 +86,7 @@ user_bins=(
 user_cfgs=(
            "cfg/user/colors/env:$ZDOTDIR/colorsenv"
            "cfg/user/dunstrc:$XDG_CONFIG_HOME/dunst/dunstrc"
-           "cfg/user/fehbg:$XDG_CONFIG_HOME/fehbg"
+           "cfg/user/fehbg:$XDG_CONFIG_HOME/feh/fehbg"
            "cfg/user/git/config:$XDG_CONFIG_HOME/git/config"
            "cfg/user/htoprc:$XDG_CONFIG_HOME/htop/htoprc"
            "cfg/user/inputrc:$HOME/.inputrc"                                       # TODO: make xdg-compliant

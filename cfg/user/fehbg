@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# $XDG_CONFIG_HOME/.fehbg
+# $XDG_CONFIG_HOME/feh/fehbg
 #
 # This script sets the wallpaper to the image or symlink at ~/img/wp/wallpaper
 #
-feh --no-fehbg --bg-fill "$HOME/img/wp/wallpaper"
+feh --no-fehbg --bg-fill "$HOME/pics/wp/wallpaper"
