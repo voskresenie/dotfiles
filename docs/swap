@@ -8,11 +8,17 @@
 # apparently there's no need to enable systemd-swap
 #
 swapfile=/var/swap/swapfile01_8G
-chmod 0600 /var/swap/swapfile01_8&
-dd if=/dev/zero of="$swapfile" count=8k status=progress
+#chmod 0600 /var/swap/swapfile01_8& -- not sure why I had this here, probably just a copying error
+dd if=/dev/zero of="$swapfile" bs=1M count=8k status=progress
 chmod 0600 "$swapfile"
 mkswap -U clear "$swapfile"
+swapon "$swapfile"
 echo "$swapfile" none swap defaults 0 0 >> /etc/fstab
 
 # run to verify it's working
 free -m
+
+# to disable
+# swapoff "$swapfile"
+# rm -f "$swapfile"
+# then remove from fstab
