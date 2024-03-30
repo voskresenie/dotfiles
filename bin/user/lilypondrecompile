@@ -1,0 +1,27 @@
+#!/bin/zsh
+# lilypond-recompile
+
+lilypond-recompile() {
+  readonly local fly="${1:?'The file must be specified}"
+  readonly local fnoly="${fly%.ly}"
+  echo $fly
+  echo $fnoly
+
+  mupdf "$fnoly.pdf" &
+  readonly local dir="$(dirname "$(realpath "$fly")")"
+  print $dir
+  #readonly local dir="."
+  inotifywait -e close_write,moved_to,create -m "$dir" |
+  while read -r directory events filename; do
+    print "filename: $filename"
+    print "fly: $fly"
+    print "realpath filename: $(realpath "$dir/$filename")"
+    print "realpath fly: $(realpath "$fly")"
+    if [ "$(realpath "$dir/$filename")" = "$(realpath "$fly")" ]; then
+      lilypond -o "$fnoly" "$fly"
+      pkill -HUP mupdf
+    fi
+  done
+}
+
+lilypond-recompile "${@:1}"
