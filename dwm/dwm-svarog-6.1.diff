@@ -40,7 +40,7 @@ diff -aur -x config.h -x dwm a/config.def.h b/config.def.h
 +static const char *tmuxcmd[]  = { "urxvt", "-e", "zsh", "-c", "tmux", NULL };
 +
 +/* change keyboard layout */
-+static const char *xkbdvorakcmd[] = { "setxkbmap", "dvorak", NULL };
++static const char *xkbdvorakcmd[] = { "setxkbmap", "us", "dvorak", NULL };
 +static const char *xkbrucmd[] = { "setxkbmap", "ru", NULL };
  
  static Key keys[] = {
