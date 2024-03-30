@@ -124,7 +124,9 @@ alias media='cd /mnt/media'
 #alias ncmpcpp='ncmpcpp -h valhalla'
 alias mpv='mpv -fs'
 play () {
-  (mpv "${@:1}" &) &>/dev/null
+  for f in "${@:1}"; do
+    (mpv "$f" &) &>/dev/null
+  done
 }
 film () {
   local f="$1"
