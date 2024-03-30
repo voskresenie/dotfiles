@@ -30,6 +30,7 @@ zstyle ':completion:*' completer _expand _complete _ignored _approximate
 zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle :compinstall filename '/home/david/.zshrc'
 
+autoload -Uz zmv                    # batch rename
 autoload -Uz compinit
 compinit -d $ZCACHEDIR/zcompdump-$ZSH_VERSION
 # End of lines added by compinstall
@@ -56,6 +57,12 @@ findsyms () {
   readonly local f="$1"
   readonly local d="$2"
   find -L $d -samefile $f 2&>/dev/null
+}
+# renames Firefox screenshots ("Screenshot_yyyy-mm-dd_hh-mm-ss.png") to common format ("yyyy-mm-ddThhmmssTZ.png")
+rnffss () {
+  cd ~/ss
+  # "Screenshot 2024-02-04 at 17-28-34 Google Calendar - Week of January 29 2024.png"
+  zmv -v 'Screenshot (<->)-(<0-12>)-(<0-31>) at (<0-24>)-(<0-60>)-(<0-60>) (*).png' '$1-$2-$3T$4$5$6 $7.png'
 }
 
 # packages
@@ -99,8 +106,8 @@ pdf () {
 }
 
 # screenshots
-alias lastscreen='ls ~/ss/*.png | tail -n 1'
-alias vlastscreen='feh "$(ls ~/ss/*.png | tail -n 1)"'
+alias lastscreen='ls ~/ss/20*.png | tail -n 1'
+alias vlastscreen='feh "$(ls ~/ss/20*.png | tail -n 1)"'
 alias screenfetch='screenfetch -c 04,13'
 alias scrot='scrot ~/ss/%Y-%m-%dT%H%M%S%z.png'
 screengrab() {
@@ -144,6 +151,7 @@ alias valhalla='ssh valhalla'
 
 # shell
 setopt auto_cd
+setopt extended_glob
 alias .='ls'
 
 source "$ZDOTDIR"/colorsenv
