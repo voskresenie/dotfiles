@@ -161,7 +161,7 @@ source "$ZDOTDIR"/colorsenv
 export PS1="@%m %1~ $ "
 source /usr/share/doc/pkgfile/command-not-found.zsh
 
-alias ls='ls -h --color=auto -N'
+alias ls='ls -h --color=auto -N --group-directories-first'
 alias which='which -a'
 
 alias copy='xsel -i'
