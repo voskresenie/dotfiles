@@ -3,6 +3,10 @@
 #
 listop prepend PROFILES ${(%):-%x}
 
+# tmux colors
+# TODO: import these settings from host-specific env files
+export TMUX_STATUS_BG="black"
+
 # go
 export GOPATH=$XDG_DATA_HOME/go
 export PATH=$GOPATH/bin:$PATH
