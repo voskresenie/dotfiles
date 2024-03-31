@@ -1,0 +1,25 @@
+#!/bin/zsh
+# lastmodifytime
+
+main() {
+  readonly local d="${1:?the directory must be specified}"
+  local lswot="$(ls -l --time-style=+\| --sort=time "$d" | head -n 2 | tail -n 1)"
+  local lswt="$(ls -l --time-style=+%Y-%m-%d --sort=time "$d" | head -n 2 | tail -n 1)"
+  local parts=("${(s:|:)lswot}")
+  local lastmodifytime="${lswt[$((${#${parts[1]}}+1)),$((${#${lswt}}-${#${(j[|])parts:1}}))]}" # YYYY-MM-DD
+  print $lastmodifytime
+
+  ## full logic
+  # readonly local d="${1:?the directory must be specified}"
+  # local lswot="$(ls -l --time-style=+\| --sort=time "$d" | head -n 2 | tail -n 1)"
+  # local lswt="$(ls -l --time-style=+%Y-%m-%d --sort=time "$d" | head -n 2 | tail -n 1)"
+  # local parts=("${(s:|:)lswot}")
+  # local firstpart="${parts[1]}"
+  # local lastpart="${(j[|])parts:1}" # done in unlikely and unfortunate case that a filename contains a pipe
+  # local lenfp="${#${firstpart}}"
+  # local lenlp="${#${lastpart}}"
+  # local lentot="${#${lswt}}"
+  # local lastmodifytime="${lswt[$(($lenfp+1)),$(($lentot-$lenlp))]}" # YYYY-MM-DD
+  # print $lastmodifytime
+}
+main "${@:1}"

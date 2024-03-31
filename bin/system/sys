@@ -79,6 +79,8 @@ system_cfgs=(
 
 user_bins=(
            "bin/user/flac2mp3:$HOME/bin/flac2mp3"
+           "bin/user/lastmodifytime:$HOME/bin/lastmodifytime"
+           "bin/user/lilypondrecompile:$HOME/bin/lilypondrecompile"
            "bin/user/webm:$HOME/bin/webm"
            "bin/user/xstat:$HOME/bin/xstat"
          )
