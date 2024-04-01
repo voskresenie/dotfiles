@@ -119,8 +119,13 @@ screengrab() {
 }
 
 # media
+mediarwx() {
+  readonly local f="${@:1}"
+  sudo chmod -R ugo+rwX,o-w "$f"
+  sudo chown -R david:audio "$f"
+}
+
 alias chmodgw='sudo chmod -R ugo+rwX,o-w'
-alias media='cd /mnt/media'
 #alias ncmpcpp='ncmpcpp -h valhalla'
 alias mpv='mpv -fs'
 play () {
@@ -128,19 +133,34 @@ play () {
     (mpv "$f" &) &>/dev/null
   done
 }
+
+alias media='cd /mnt/media'
+alias classical='cd /mnt/media/classical'
+alias contemporary='cd /mnt/media/contemporary'
+alias soundtracks='cd /mnt/media/soundtracks'
+alias anime='cd /mnt/media/anime'
+alias stand.up='cd /mnt/media/stand.up'
 film () {
-  local f="$1"
-  ls -d /mnt/media/film/* | grep -E "$f" |
-    tee >(xargs mpv &>/dev/null &)
+  readonly local f="$1"
+  if [ -z "$f" ]; then
+    cd /mnt/media/film
+  else
+    ls -d /mnt/media/film/* | grep -E "$f" |
+      tee >(xargs mpv &>/dev/null &)
+  fi
 }
 tv () {
-  local series="$1"
-  local season="$2"
-  local episode="$3"
-  ls -d /mnt/media/tv/*${series}*/* | #grep -E "$series" |
-    #xargs ls -d | grep -E "[sS][0-9]*${season}.*[eE]${episode}" |
-    grep -E "[sS][0-9]*${season}.*[eE][0-9]*${episode}" |
-    tee >(xargs mpv &>/dev/null &)
+  readonly local series="$1"
+  readonly local season="$2"
+  readonly local episode="$3"
+  if [ -z "$series" ]; then
+    cd /mnt/media/tv
+  else
+    ls -d /mnt/media/tv/*${series}*/* | #grep -E "$series" |
+      #xargs ls -d | grep -E "[sS][0-9]*${season}.*[eE]${episode}" |
+      grep -E "[sS][0-9]*${season}.*[eE][0-9]*${episode}" |
+      tee >(xargs mpv &>/dev/null &)
+  fi
 }
 
 # gaming
