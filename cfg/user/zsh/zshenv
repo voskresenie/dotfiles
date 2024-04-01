@@ -17,3 +17,10 @@ export JAVA_HOME=/usr/lib/jvm/default
 
 # steam
 export STEAM_RUNTIME=0
+
+hostenv=$XDG_CONFIG_HOME/zsh/zshenv.$HOST
+hostenvd=$XDG_CONFIG_HOME/zsh/zshenv.${HOST}.d
+[ -f "$hostenv" ] && source "$hostenv"
+[ -e "$hostenvd" ] && for f (~/**/*(N.)); do
+  source "$hostenvd"/**/*
+done

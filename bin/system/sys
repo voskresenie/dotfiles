@@ -109,11 +109,22 @@ user_cfgs=(
            "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                           # TODO: make xdg-compliant
            "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                   # TODO: make xdg-compliant
            "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
-           "cfg/user/zsh/zlogin:$ZDOTDIR/.zlogin"                                  # TODO: see if it's possible to remove preceding dot
-           "cfg/user/zsh/zlogout:$ZDOTDIR/.zlogout"                                # TODO: see if it's possible to remove preceding dot
-           "cfg/user/zsh/zprofile:$ZDOTDIR/.zprofile"                              # TODO: see if it's possible to remove preceding dot
-           "cfg/user/zsh/zshenv:$ZDOTDIR/.zshenv"                                  # TODO: see if it's possible to remove preceding dot
-           "cfg/user/zsh/zshrc:$ZDOTDIR/.zshrc"                                    # TODO: see if it's possible to remove preceding dot
+           # TODO: Add support for copying entire directory with * operator
+           "cfg/user/zsh/.zlogin:$ZDOTDIR/.zlogin"
+           "cfg/user/zsh/.zlogout:$ZDOTDIR/.zlogout"
+           "cfg/user/zsh/.zprofile:$ZDOTDIR/.zprofile"
+           "cfg/user/zsh/.zshenv:$ZDOTDIR/.zshenv"
+           "cfg/user/zsh/.zshrc:$ZDOTDIR/.zshrc"
+           "cfg/user/zsh/zlogin:$ZDOTDIR/zlogin"
+           "cfg/user/zsh/zlogout:$ZDOTDIR/zlogout"
+           "cfg/user/zsh/zprofile:$ZDOTDIR/zprofile"
+           "cfg/user/zsh/zshenv:$ZDOTDIR/zshenv"
+           "cfg/user/zsh/zshrc:$ZDOTDIR/zshrc"
+           "cfg/user/zsh/zlogin.d:$ZDOTDIR/zlogin.d"
+           "cfg/user/zsh/zlogout.d:$ZDOTDIR/zlogout.d"
+           "cfg/user/zsh/zprofile.d:$ZDOTDIR/zprofile.d"
+           "cfg/user/zsh/zshenv.d:$ZDOTDIR/zshenv.d"
+           "cfg/user/zsh/zshrc.d:$ZDOTDIR/zshrc.d"
 
            #cfg/user/"fonts.conf:$XDG_CONFIG_HOME/fontconfig/fonts.conf"
            #dwb/
