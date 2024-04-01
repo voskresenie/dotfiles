@@ -3,8 +3,9 @@
 
 main() {
   readonly local d="${1:?the directory must be specified}"
-  local lswot="$(ls -l --time-style=+\| --sort=time "$d" | head -n 2 | tail -n 1)"
-  local lswt="$(ls -l --time-style=+%Y-%m-%d --sort=time "$d" | head -n 2 | tail -n 1)"
+  [ -z "$2" ] || readonly local ext=".${2}"
+  local lswot="$(ls -l --time-style=+\| --sort=time "$d"/*"$ext" | head -n 1)" 2>/dev/null
+  local lswt="$(ls -l --time-style=+%Y-%m-%d --sort=time "$d"/*"$ext" | head -n 1)" 2>/dev/null
   local parts=("${(s:|:)lswot}")
   local lastmodifytime="${lswt[$((${#${parts[1]}}+1)),$((${#${lswt}}-${#${(j[|])parts:1}}))]}" # YYYY-MM-DD
   print $lastmodifytime
