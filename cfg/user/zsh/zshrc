@@ -149,6 +149,7 @@ export STEAM_RUNTIME=0
 
 # network
 alias rsync='rsync -a --info=progress2'
+alias rsbackup='rsync -avhH --delete --info=progress2'
 alias svarog='ssh svarog'
 alias valhalla='ssh valhalla'
 
