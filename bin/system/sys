@@ -78,6 +78,8 @@ system_cfgs=(
            )
 
 user_bins=(
+           "bin/user/cheat:$HOME/bin/cheat"
+           "bin/user/cheats:$HOME/bin/cheats"
            "bin/user/flac2mp3:$HOME/bin/flac2mp3"
            "bin/user/lastmodifytime:$HOME/bin/lastmodifytime"
            "bin/user/lilypondrecompile:$HOME/bin/lilypondrecompile"

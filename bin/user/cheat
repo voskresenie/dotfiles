@@ -1,0 +1,16 @@
+#!/bin/zsh
+# cheat
+
+readonly dir="$(dirname "$(realpath "$0")")"
+
+cheat () {
+  readonly local pkg="${1:?'The package must be specified}"
+
+  if [ -e "$dir/cheats/$pkg" ]; then
+    cat "$dir/cheats/$pkg" | less
+  else
+    print "$0: no cheatsheet available for $pkg"
+  fi
+}
+
+cheat "${@:1}"
