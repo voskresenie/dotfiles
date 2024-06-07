@@ -109,6 +109,7 @@ user_cfgs=(
            "cfg/user/X11/colorsdark:$XDG_CONFIG_HOME/X11/colorsdark"
            "cfg/user/X11/urxvt:$XDG_CONFIG_HOME/X11/urxvt"
            "cfg/user/X11/xbindkeysrc:$HOME/.xbindkeysrc"                           # TODO: make xdg-compliant
+           "cfg/user/X11/xcompose:$XDG_CONFIG_HOME/X11/xcompose"
            "cfg/user/X11/xinitrc:$HOME/.xinitrc"                                   # TODO: make xdg-compliant
            "cfg/user/X11/xresources:$XDG_CONFIG_HOME/X11/xresources"
            # TODO: Add support for copying entire directory with * operator

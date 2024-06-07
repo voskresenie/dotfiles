@@ -25,11 +25,13 @@ xset -dpms s off
 # MPD scrobbling daemon
 mpdcron &
 
-# laptop keys
+# special keys (volume, brightness, ...)
 xbindkeys &
 
 # swap caps and escape
 setxkbmap -option "caps:swapescape"
+xmodmap -e "keysym Super_L = Multi_key"
+export XCOMPOSEFILE="$XDG_CONFIG_HOME/X11/xcompose"
 
 # set wallpaper
 ${XDG_CONFIG_HOME:-~/.config}/feh/fehbg
